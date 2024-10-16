@@ -1,0 +1,5 @@
+export const db = "main-permdal"
+export const orderCollection = "orders"
+export const postCollection = "posts"
+export const eventCollection = "events"
+export const produceCollection = "produce"
