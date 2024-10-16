@@ -1,7 +1,6 @@
-import { databases, users } from "@/models/server/config";
+import { users } from "@/models/server/config";
 import { UserPrefs } from "@/store/Auth";
 import React from "react";
-import { Query } from "node-appwrite";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

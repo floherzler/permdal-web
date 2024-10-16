@@ -11,10 +11,9 @@ const Layout = ({children}: {children: React.ReactNode}) => {
   const router = useRouter()
 
   React.useEffect(() => {
-    if (session) {
-      const name = user?.name || "User";
-      const slugifiedName = name.toLowerCase().replace(/\s+/g, '-');
-      router.push(`/users/${user?.$id}/${slugifiedName}`);
+    if (session && user) {
+      const slugifiedName = user.name.toLowerCase().replace(/\s+/g, '-');
+      router.push(`/users/${user.$id}/${slugifiedName}`);
     }
   }, [session, router])
 
