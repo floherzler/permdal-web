@@ -12,8 +12,12 @@ const Layout = ({children}: {children: React.ReactNode}) => {
 
   React.useEffect(() => {
     if (session && user) {
-      const slugifiedName = user.name.toLowerCase().replace(/\s+/g, '-');
-      router.push(`/users/${user.$id}/${slugifiedName}`);
+      console.log(user.labels)
+      if (user.labels.includes('admin')) {
+        router.push('/zentrale')
+      } else {
+        router.push('/')
+      }
     }
   }, [session, router])
 
