@@ -210,13 +210,13 @@ export default function StaffelAdmin({ initialStaffeln }: { initialStaffeln: Sta
     return () => unsubscribe()
   }, [])
 
-    function handleEdit($id: string): void {
-        const [isDialogOpen, setIsDialogOpen] = useState(false);
-        const [selectedStaffel, setSelectedStaffel] = useState<Staffel | null>(null);
+    // function handleEdit($id: string): void {
+    //     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    //     const [selectedStaffel, setSelectedStaffel] = useState<Staffel | null>(null);
 
-        setSelectedStaffel(staffeln.find((staffel) => staffel.$id === $id) || null);
-        setIsDialogOpen(true);
-    }
+    //     setSelectedStaffel(staffeln.find((staffel) => staffel.$id === $id) || null);
+    //     setIsDialogOpen(true);
+    // }
 
   return (
     <div className="flex flex-wrap gap-4 justify-center pt-8">
