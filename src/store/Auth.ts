@@ -43,125 +43,130 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
     persist(
-            immer((set) => ({
-                session: null as Models.Session | null,
-                jwt: null as string | null,
-                user: null as Models.User<UserPrefs> | null,
-                hydrated: false,
-    
-                setHydrated() {
+        immer((set) => ({
+            session: null as Models.Session | null,
+            jwt: null as string | null,
+            user: null as Models.User<UserPrefs> | null,
+            hydrated: false,
+
+            setHydrated() {
+                set((state) => {
+                    state.hydrated = true;
+                });
+            },
+
+            setSession(session: Models.Session | null, user: Models.User<UserPrefs> | null) {
+                set((state) => {
+                    state.session = session;
+                    state.user = user;
+                });
+            },
+
+            async updateUser(user: Models.User<UserPrefs>) {
+                try {
+                    const updatedUser = await account.get<UserPrefs>();
                     set((state) => {
-                        state.hydrated = true;
+                        state.user = updatedUser;
                     });
-                },
-    
-                setSession(session: Models.Session | null, user: Models.User<UserPrefs> | null) {
+                } catch (error) {
+                    console.log(error);
+                };
+            },
+
+            async verifySession() {
+                try {
+                    const session = await account.getSession("current");
+                    set((state) => {
+                        state.session = session;
+                    });
+                    const [user, { jwt }] = await Promise.all([
+                        account.get<UserPrefs>(),
+                        account.createJWT(),
+                    ]);
+                    set((state) => {
+                        state.user = user;
+                        state.jwt = jwt;
+                    });
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+
+            async login(email: string, password: string) {
+                try {
+                    const session = await account.createEmailPasswordSession(
+                        email,
+                        password
+                    );
+                    const [user, { jwt }] = await Promise.all([
+                        account.get<UserPrefs>(),
+                        account.createJWT(),
+                    ]);
+                    if (!user.prefs) await account.updatePrefs<UserPrefs>({ theme: "light" });
                     set((state) => {
                         state.session = session;
                         state.user = user;
+                        state.jwt = jwt;
                     });
-                },
+                    return { success: true };
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        success: false,
+                        error: error instanceof AppwriteException ? error : null,
+                    };
+                }
+            },
 
-                async updateUser(user: Models.User<UserPrefs>) {
-                    try {
-                        const updatedUser = await account.get<UserPrefs>();
-                        set((state) => {
-                            state.user = updatedUser;
-                        });
-                    } catch (error) {
-                        console.log(error);
+            async createAccount(name: string, email: string, password: string) {
+                try {
+                    await account.create(ID.unique(), email, password, name);
+                    return { success: true };
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        success: false,
+                        error: error instanceof AppwriteException ? error : null,
                     };
-                },
-    
-                async verifySession() {
-                    try {
-                        const session = await account.getSession("current");
-                        set((state) => {
-                            state.session = session;
-                        });
-                        const [user, { jwt }] = await Promise.all([
-                            account.get<UserPrefs>(),
-                            account.createJWT(),
-                        ]);
-                        set((state) => {
-                            state.user = user;
-                            state.jwt = jwt;
-                        });
-                    } catch (error) {
-                        console.log(error);
-                    }
-                },
-    
-                async login(email: string, password: string) {
-                    try {
-                        const session = await account.createEmailPasswordSession(
-                            email,
-                            password
-                        );
-                        const [user, { jwt }] = await Promise.all([
-                            account.get<UserPrefs>(),
-                            account.createJWT(),
-                        ]);
-                        if (!user.prefs) await account.updatePrefs<UserPrefs>({ theme: "light" });
-                        set((state) => {
-                            state.session = session;
-                            state.user = user;
-                            state.jwt = jwt;
-                        });
-                        return { success: true };
-                    } catch (error) {
-                        console.log(error);
-                        return {
-                            success: false,
-                            error: error instanceof AppwriteException ? error : null,
-                        };
-                    }
-                },
-    
-                async createAccount(name: string, email: string, password: string) {
-                    try {
-                        await account.create(ID.unique(), email, password, name);
-                        return { success: true };
-                    } catch (error) {
-                        console.log(error);
-                        return {
-                            success: false,
-                            error: error instanceof AppwriteException ? error : null,
-                        };
-                    }
-                },
-    
-                async logout() {
-                    try {
-                        await account.deleteSession('current');
-                        set((state) => {
-                            state.session = null;
-                            state.jwt = null;
-                            state.user = null;
-                        });
-                    } catch (error) {
-                        console.log(error);
-                    }
-                },
-    
-                // async setUser(session: Models.Session | null, user: Models.User<UserPrefs> | null) {
-                //     if (user) {
-                //         await account.updatePrefs<UserPrefs>(user.prefs);
-                //     }
-                //     set((state) => {
-                //         state.user = user;
-                //         state.session = session;
-                //     });
-                // },
-            })),
-            {
-                name: "auth",
-                onRehydrateStorage() {
-                    return (state, error) => {
-                        if (!error) state?.setHydrated();
-                    };
-                },
-            }
-        )
+                }
+            },
+
+            async logout() {
+                try {
+                    await account.deleteSession('current');
+                    set((state) => {
+                        state.session = null;
+                        state.jwt = null;
+                        state.user = null;
+                    });
+                } catch (error) {
+                    console.log(error);
+                    set((state) => {
+                        state.session = null;
+                        state.jwt = null;
+                        state.user = null;
+                    });
+                }
+            },
+
+            // async setUser(session: Models.Session | null, user: Models.User<UserPrefs> | null) {
+            //     if (user) {
+            //         await account.updatePrefs<UserPrefs>(user.prefs);
+            //     }
+            //     set((state) => {
+            //         state.user = user;
+            //         state.session = session;
+            //     });
+            // },
+        })),
+        {
+            name: "auth",
+            onRehydrateStorage() {
+                return (state, error) => {
+                    if (!error) state?.setHydrated();
+                };
+            },
+        }
+    )
 );
 
