@@ -61,10 +61,10 @@ import Navbar from "@/components/Navbar";
 // }
 
 export default function Home() {
-  
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-black">
-      
+
       <Navbar />
 
       <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-black space-y-8">
