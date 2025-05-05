@@ -1,57 +1,54 @@
+// app/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { databases } from "@/models/client/config";
 import env from "@/app/env";
-import StaffelAdmin from "@/components/StaffelAdmin";
-import ProduktListe from "@/components/ProductList";
+import BlogPostList from "@/components/BlogPostList";
+import BestellungsList from "@/components/BestellungsList";
 
 export default function Page() {
-  const [produkte, setProdukte] = useState<Produkt[] | null>(null);
+  const [bestellungen, setBestellungen] = useState<Bestellung[] | null>(null);
 
   useEffect(() => {
     async function load() {
       console.log("Fetching staffeln on the client…");
       const resp = await databases.listDocuments(
         env.appwrite.db,
-        env.appwrite.produce_collection_id
+        env.appwrite.order_collection_id
       );
-      setProdukte(
+      setBestellungen(
         resp.documents.map((doc) => ({
           $id: doc.$id,
           $createdAt: doc.$createdAt,
-          name: doc.name,
-          sorte: doc.sorte,
-          hauptkategorie: doc.hauptkategorie,
-          unterkategorie: doc.unterkategorie,
-          lebensdauer: doc.lebensdauer,
-          fruchtfolge_vor: doc.fruchtfolge_vor,
-          fruchtfolge_nach: doc.fruchtfolge_nach,
-          bodenansprueche: doc.bodenansprueche,
-          begleitpflanzen: doc.begleitpflanzen,
+          userID: doc.userID,
+          staffelID: doc.staffelID,
+          quantity: doc.quantity,
+          pickup: doc.pickup,
+          price: doc.price,
         }))
       );
     }
     load();
   }, []);
 
-  if (!produkte) {
+  if (!bestellungen) {
     return <div>Loading…</div>;
   }
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold">Produkte</h1>
+        <h1 className="text-3xl font-bold">Bestellungen</h1>
         <a
-          href="/staffeln"
+          href="/produkte"
           className="text-blue-500 hover:underline text-lg"
         >
-          Zu den Staffeln
+          Zu den Produkten
         </a>
       </div>
       <div className="w-full max-w-4xl">
-        <ProduktListe initialProdukte={produkte} />
+        <BestellungsList initialBestellungen={bestellungen} />
       </div>
     </main>
   );

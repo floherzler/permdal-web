@@ -2,12 +2,13 @@ interface Staffel {
     $id: string;
     $createdAt: string;
     produktID: string;
-    saatDatum: Date;
+    saatPflanzDatum: Date;
     ernteProjektion: Date[],
     einheit: string;
     euroPreis: number;
     menge: number;
     mengeVerfuegbar: number;
+    mengeAbgeholt: number;
 }
 
 interface Produkt {
@@ -22,4 +23,26 @@ interface Produkt {
     fruchtfolge_nach: string[];
     bodenansprueche: string;
     begleitpflanzen: string[];
+}
+
+interface BlogPost {
+    $id: string;
+    $createdAt: string;
+    title: string;
+    description: string;
+    content: string;
+    tags: string[];
+    writtenBy: string;
+    writtenAt: Date;
+    updatedAt: Date;
+}
+
+interface Bestellung {
+    $id: string;
+    $createdAt: string;
+    staffelID: string;
+    quantity: string;
+    price: number;
+    pickup: Date;
+    userID: string;
 }

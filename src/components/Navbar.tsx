@@ -46,7 +46,7 @@ export default function Navbar() {
 
             {/* Blog */}
             <NavigationMenuItem>
-              <Link href="/bestellungen" legacyBehavior passHref>
+              <Link href="/blog" legacyBehavior passHref>
                 <NavigationMenuLink
                   className="px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 bg-emerald-50 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
                 >
