@@ -1,0 +1,106 @@
+direction: right
+produkt: {
+  shape: sql_table
+
+  produkt_id: String {constraint: primary_key}
+  art: String
+  sorte: String
+  hauptkategorie: Enum(obst|gemüse|kraeuter|blume|maschine|dienstleistung|sonstiges)
+  unterkategorie: Enum(huelsenfruechte|steinobst etc)
+  lebensdauer: Enum(einjaehrig|zweijaehrig|mehrjaehrig)
+  fruchtfolge_vor: "String[]"
+  fruchtfolge_nach: "String[]"
+  bodenansprueche: String
+  begleitpflanzen: String
+  anzuchtzeit: String
+  saat_pflanzung_gewaechshaus: String
+  saat_pflanzung_freiland: String
+  erntezeit: String
+  haltbarkeit_tage: int
+  lagerung_bis: String
+  verarbeitung_zu: "produkt_id[]"
+}
+
+staffel: {
+  shape: sql_table
+
+  staffel_id: String {constraint: primary_key}
+  produkt_id: String {constraint: foreign_key}
+  jahr: int
+  saat_pflanz_datum: timestamp
+  ernte_projektion: "timestamp[]"
+  menge_projektion: int
+  einheit: Enum(stueck|gramm|bund)
+  euro_preis: double
+  menge_verfuegbar: int
+  menge_abgeholt: int
+  preis_produzent: double
+  preis_standard: double
+  preis_sonder: double
+  erwarteter_umsatz: double
+}
+
+mitgliedschaft: {
+  shape: sql_table
+
+  mitgliedschaft_id: String {constraint: primary_key} # für Überweisung genutzt zB mb2025-007
+  user_id: String {constraint: foreign_key}
+  typ: Enum(privat|business)
+  dauer_jahre: int
+  beantragungs_datum: date
+  status: Enum(beantragt|aktiv|abgelaufen|storniert)
+  storno_grund: String?
+  bezahl_status: Enum(warten|teilbezahlt|bezahlt)
+  bezahl_datum: date?
+  start: date?
+  ende: date?
+  letzte_erinnerung: date?
+  kontingent_start: double
+  kontingent_aktuell: double? # zwischen start und Null
+}
+
+bestellung: {
+  shape: sql_table
+
+  bestellung_id: String {constraint: primary_key}
+  user_id: String {constraint: foreign_key}
+  user_mail: String
+  mitgliedschaft_id: String {constraint: foreign_key}
+  staffel_id: String {constraint: foreign_key}
+  menge: String
+  preis: double
+  abholung: timestamp
+  produkt: String
+}
+
+user: {
+  shape: sql_table
+
+  user_id: String {constraint: primary_key}
+  email: String {constraint: unique}
+  user_label: Enum(none|admin|dev|privatKunde|businessKunde)
+}
+
+produkt -> staffel: hat {
+  source-arrowhead: 1
+  target-arrowhead: N
+  # style.animated: true
+}
+
+bestellung -> mitgliedschaft: gehört zu {
+  source-arrowhead: N
+  target-arrowhead: 1
+  # style.animated: true
+}
+
+bestellung -> staffel: besteht aus {
+  source-arrowhead: N
+  target-arrowhead: 1
+  # style.animated: true
+}
+
+user -> mitgliedschaft: hat {
+  source-arrowhead: 1
+  target-arrowhead: 1
+  # style.animated: true
+}
