@@ -21,10 +21,10 @@ produkt: {
   verarbeitung_zu: "produkt_id[]"
 }
 
-staffel: {
+angebot: {
   shape: sql_table
 
-  staffel_id: String {constraint: primary_key}
+  angebot_id: String {constraint: primary_key}
   produkt_id: String {constraint: foreign_key}
   jahr: int
   saat_pflanz_datum: timestamp
@@ -66,7 +66,7 @@ bestellung: {
   user_id: String {constraint: foreign_key}
   user_mail: String
   mitgliedschaft_id: String {constraint: foreign_key}
-  staffel_id: String {constraint: foreign_key}
+  angebot_id: String {constraint: foreign_key}
   menge: String
   preis: double
   abholung: timestamp
@@ -81,7 +81,7 @@ user: {
   user_label: Enum(none|admin|dev|privatKunde|businessKunde)
 }
 
-produkt -> staffel: hat {
+produkt -> angebot: hat {
   source-arrowhead: 1
   target-arrowhead: N
   # style.animated: true
@@ -93,7 +93,7 @@ bestellung -> mitgliedschaft: gehört zu {
   # style.animated: true
 }
 
-bestellung -> staffel: besteht aus {
+bestellung -> angebot: besteht aus {
   source-arrowhead: N
   target-arrowhead: 1
   # style.animated: true

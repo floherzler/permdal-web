@@ -1,65 +1,73 @@
-export const dynamic = "force-dynamic";
+'use client';
 
-import React from "react";
-import { getStaffeln } from "../actions/getStaffeln";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import StaffelAdmin from "@/components/StaffelAdmin";
+import { useEffect, useState } from "react";
+import { databases } from "@/models/client/config";
+import env from "@/app/env";
+import ZentraleAdmin from "@/components/ZentraleAdmin";
 
-export default async function Page() {
-  const staffeln: Staffel[] = await getStaffeln();
+export default function Page() {
+  const [produkte, setProdukte] = useState<Produkt[] | null>(null);
+  const [staffeln, setStaffeln] = useState<Staffel[] | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      const [produkteResp, staffelnResp] = await Promise.all([
+        databases.listDocuments(
+          env.appwrite.db,
+          env.appwrite.produce_collection_id
+        ),
+        databases.listDocuments(
+          env.appwrite.db,
+          env.appwrite.staffel_collection_id
+        ),
+      ]);
+
+      setProdukte(
+        produkteResp.documents.map((doc) => ({
+          $id: doc.$id,
+          $createdAt: doc.$createdAt,
+          name: doc.name,
+          sorte: doc.sorte,
+          hauptkategorie: doc.hauptkategorie,
+          unterkategorie: doc.unterkategorie,
+          lebensdauer: doc.lebensdauer,
+          fruchtfolge_vor: doc.fruchtfolge_vor,
+          fruchtfolge_nach: doc.fruchtfolge_nach,
+          bodenansprueche: doc.bodenansprueche,
+          begleitpflanzen: doc.begleitpflanzen,
+        }))
+      );
+
+      setStaffeln(
+        staffelnResp.documents.map((doc) => ({
+          $id: doc.$id,
+          $createdAt: doc.$createdAt,
+          produktID: doc.produktID,
+          saatPflanzDatum: doc.saatPflanzDatum,
+          ernteProjektion: doc.ernteProjektion,
+          menge: doc.menge,
+          einheit: doc.einheit,
+          euroPreis: doc.euroPreis,
+          mengeVerfuegbar: doc.mengeVerfuegbar,
+          mengeAbgeholt: doc.mengeAbgeholt,
+        }))
+      );
+    }
+    load();
+  }, []);
+
+  if (!produkte || !staffeln) {
+    return <div>Loading…</div>;
+  }
+
   return (
-    <main className="flex flex-col items-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Zentrale</h1>
-        <StaffelAdmin initialStaffeln={staffeln} />
-
-        <div className="grid grid-rows-2 gap-4">
-            <div className="flex flex-row gap-4">
-                <Card className="flex flex-col justify-between">
-                    <CardHeader className="flex-row gap-4 items-center">
-                    {/* <Avatar>
-                        <AvatarImage src={productURLs[index]} alt={productNames[index]} className="rounded-md" />
-                        <AvatarFallback>
-                        {productNames[index].charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar> */}
-                        <CardTitle>Produkt Hinzufügen</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-    
-                    <CardDescription>TODO: Funktionalität</CardDescription>
-                    {/* <CardDescription>Verfügbar: 10kg</CardDescription> */}
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                        <Button>Hinzufügen</Button>
-                    </CardFooter>
-                </Card>
-                <Card className="flex flex-col justify-between">
-                    <CardHeader className="flex-row gap-4 items-center">
-                    {/* <Avatar>
-                        <AvatarImage src={productURLs[index]} alt={productNames[index]} className="rounded-md" />
-                        <AvatarFallback>
-                        {productNames[index].charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar> */}
-                        <CardTitle>Staffel Hinzufügen</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-    
-                    <CardDescription>TODO: Funktionalität</CardDescription>
-                    {/* <CardDescription>Verfügbar: 10kg</CardDescription> */}
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                        <Button>Hinzufügen</Button>
-                    </CardFooter>
-                </Card>
-            </div>
-            <div className="flex flex-row gap-4">
-                <Card>Card 3</Card>
-                <Card>Card 4</Card>
-            </div>
-        </div>
+    <main className="min-h-screen flex flex-col items-center justify-center">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold">Zentrale</h1>
+      </div>
+      <div className="w-full max-w-4xl">
+        <ZentraleAdmin initialProdukte={produkte} initialStaffeln={staffeln} />
+      </div>
     </main>
   );
-};
+}
