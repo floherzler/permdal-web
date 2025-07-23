@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function AboutSection() {
   return (
-    <div className="relative w-3/4 max-w-3xl p-6 rounded-lg shadow-lg flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-6 max-w-4xl mx-auto">
+    <div className="relative w-3/4 max-w-3xl p-6 rounded-lg shadow-lg flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 max-w-4xl mx-auto">
       {/* Image Section */}
       <div className="w-full md:w-1/2">
         <Image
@@ -14,16 +14,15 @@ export default function AboutSection() {
           className="rounded-lg"
         />
       </div>
-
       {/* Text Content */}
       <div className="w-full md:w-1/2 text-center md:text-left">
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
+        <h2 className="text-3xl font-bold text-gray-800">
           Die Marke Permdal
         </h2>
-        <p className="text-lg text-gray-700 dark:text-gray-300">
+        <p className="text-lg text-gray-700">
           Wir bauen tolle Sachen an, die ihr euch abholen könnt. Kontaktiert uns auch gerne für interessante Kooperationen mit regionaler Gastronomie!
         </p>
-        <p className="text-lg text-gray-700 dark:text-gray-300 mt-2">
+        <p className="text-lg text-gray-700 mt-2">
           Ins Leben gerufen von Frank F. und seinem Team. Erfahre noch mehr:
         </p>
 

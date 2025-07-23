@@ -2,15 +2,8 @@
 export default function CTA() {
   return (
     <div
-      className="relative w-3/4 max-w-3xl mx-auto rounded-lg overflow-hidden shadow-lg flex flex-col items-center text-center p-6"
-      style={{
-        backgroundImage: "url(/img/garten-nebel.jpeg)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      className="relative w-3/4 max-w-3xl mx-auto rounded-lg overflow-hidden shadow-lg flex flex-col items-center text-center p-6 bg-[url('/img/garten-nebel.jpeg')] bg-cover bg-center"
     >
-      {/* Overlay to darken the background */}
-      <div className="absolute inset-0 bg-black bg-opacity-30"></div>
 
       {/* Content Wrapper */}
       <div className="relative z-10 flex flex-col items-center w-full">

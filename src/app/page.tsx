@@ -61,19 +61,16 @@ import Navbar from "@/components/Navbar";
 // }
 
 export default function Home() {
-
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-black">
-
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
-
-      <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-black space-y-8">
+      {/* Add margin-top to main for spacing after Navbar */}
+      <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 space-y-8 mt-12">
         <CTA />
         <AboutSection />
         <OfferSection />
         <ImageCarousel />
       </main>
-
       <Footer />
     </div>
   );

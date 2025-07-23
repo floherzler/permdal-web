@@ -13,62 +13,60 @@ import Link from "next/link";
 export default function Navbar() {
   const { user, logout } = useAuthStore();
   return (
-    <header className="bg-gray-500 dark:bg-gray-300 shadow-sm">
+    <header className="bg-green-800">
       <div className="container mx-auto p-4 flex justify-center">
         <NavigationMenu className="flex items-center space-x-6">
           <NavigationMenuList className="flex space-x-4">
             {/* Startseite */}
             <NavigationMenuItem>
-              <Image
-                src="/img/agroforst_ff_blume.png"
-                height={80}
-                width={80}
-                className="h-auto object-cover"
-                alt="Permdal Logo"
-              />
+              <div className="bg-white rounded-full p-2 flex items-center justify-center">
+                <Image
+                  src="/img/agroforst_ff_blume.png"
+                  height={80}
+                  width={80}
+                  className="h-[80px] w-[80px] object-cover"
+                  alt="Permdal Logo"
+                />
+              </div>
             </NavigationMenuItem>
 
             {/* Produkte */}
             <NavigationMenuItem>
-              <Link href="/produkte" legacyBehavior passHref>
-                <NavigationMenuLink
-                  className="px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 bg-emerald-50 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
-                >
-                  Produkte
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink
+                href="/produkte"
+                className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
+              >
+                Produkte
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             {/* Blog */}
             <NavigationMenuItem>
-              <Link href="/blog" legacyBehavior passHref>
-                <NavigationMenuLink
-                  className="px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 bg-emerald-50 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
-                >
-                  Blog
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink
+                href="/blog"
+                className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
+              >
+                Blog
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             {/* "Bestellungen" if user has "admin" label else "Upgrade" */}
             {user && (
               <NavigationMenuItem>
                 {user.labels?.includes("admin") ? (
-                  <Link href="/bestellungen" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className="px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 bg-emerald-50 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
-                    >
-                      Bestellungen
-                    </NavigationMenuLink>
-                  </Link>
+                  <NavigationMenuLink
+                    href="/bestellungen"
+                    className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
+                  >
+                    Bestellungen
+                  </NavigationMenuLink>
                 ) : (
-                  <Link href="/mitglied-werden" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className="px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 bg-emerald-50 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
-                    >
-                      Upgrade
-                    </NavigationMenuLink>
-                  </Link>
+                  <NavigationMenuLink
+                    href="/mitglied-werden"
+                    className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
+                  >
+                    Upgrade
+                  </NavigationMenuLink>
                 )}
               </NavigationMenuItem>
             )}
@@ -78,20 +76,19 @@ export default function Navbar() {
               <NavigationMenuItem>
                 <button
                   onClick={logout}
-                  className="px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 bg-emerald-50 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+                  className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
                 >
                   {user.name} abmelden
                 </button>
               </NavigationMenuItem>
             ) : (
               <NavigationMenuItem>
-                <Link href="/login" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className="px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 bg-emerald-50 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
-                  >
-                    Anmelden
-                  </NavigationMenuLink>
-                </Link>
+                <NavigationMenuLink
+                  href="/login"
+                  className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
+                >
+                  Anmelden
+                </NavigationMenuLink>
               </NavigationMenuItem>
             )}
 
