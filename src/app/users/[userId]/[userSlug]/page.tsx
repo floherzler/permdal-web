@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { account, storage } from "@/models/client/config";
 import { UserPrefs } from "@/store/Auth";
 
-const Page = async ({ }: { params: { userId: string; userSlug: string } }) => {
+const Page = async () => {
   const user = await account.get<UserPrefs>()
   const productIds = ['67101ee80002ac89b9f9', '67101ef300253ca391c2', '67101efe003dd6525840', '67101f08000502784a8d'];
   const productNames = ['Karotten', 'Lavendel', 'Kartoffeln', 'Kürbis'];

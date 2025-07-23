@@ -2,7 +2,6 @@
 
 import env from "@/app/env";
 import { client } from '@/models/client/config';
-import { useAuthStore } from '@/store/Auth';
 import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
 
