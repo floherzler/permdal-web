@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { databases } from "@/models/client/config";
 import env from "@/app/env";
-import StaffelAdmin from "@/components/StaffelAdmin";
 import ProduktListe from "@/components/ProductList";
 
 export default function Page() {

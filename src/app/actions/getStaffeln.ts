@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 
 import env from "@/app/env"
 import { databases } from "@/models/client/config"
-import { useAuthStore } from "@/store/Auth";
 
 export async function getStaffeln(): Promise<Staffel[]> {
     console.log("Fetching staffeln...")

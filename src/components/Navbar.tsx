@@ -1,19 +1,14 @@
-import React from 'react';
 import {
   NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
   NavigationMenuItem,
   NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-} from "@/components/ui/navigation-menu"
+  NavigationMenuList
+} from "@/components/ui/navigation-menu";
 
 import Image from "next/image";
 
-import Link from "next/link";
 import { useAuthStore } from '@/store/Auth';
+import Link from "next/link";
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();

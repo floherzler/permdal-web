@@ -1,14 +1,12 @@
-import { account } from "@/models/client/config";
-import { UserPrefs } from "@/store/Auth";
-import React from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import env from "@/app/env";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { storage } from "@/models/client/config";
-import env from "@/app/env";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { account, storage } from "@/models/client/config";
+import { UserPrefs } from "@/store/Auth";
 
-const Page = async ({ params }: { params: { userId: string; userSlug: string } }) => {
+const Page = async ({ }: { params: { userId: string; userSlug: string } }) => {
   const user = await account.get<UserPrefs>()
   const productIds = ['67101ee80002ac89b9f9', '67101ef300253ca391c2', '67101efe003dd6525840', '67101f08000502784a8d'];
   const productNames = ['Karotten', 'Lavendel', 'Kartoffeln', 'Kürbis'];
@@ -22,7 +20,7 @@ const Page = async ({ params }: { params: { userId: string; userSlug: string } }
   return (
     <main>
       <h1 className="text-2xl font-bold text-center">Willkommen, {user.name}! 👋🏼</h1>
-      <div className="p-8 grid grid-cols-2 gap-8 max-w-screen-lg mx-auto px-4">
+      <div className="p-8 grid grid-cols-2 gap-8 max-w-(--breakpoint-lg) mx-auto px-4">
         {// show card for each image and corresponding label
           images.map((image, index) => (
             <Card key={productIds[index]} className="flex flex-col justify-between">

@@ -2,7 +2,6 @@ import React from "react";
 
 const Layout = async ({
     children,
-    params,
 }: {
     children: React.ReactNode;
     params: { userId: string; userSlug: string };

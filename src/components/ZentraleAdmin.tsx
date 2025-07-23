@@ -1,19 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react';
 import env from "@/app/env";
-import { client } from '@/models/client/config';
-import { databases } from '@/models/client/config';
-import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { client, databases } from '@/models/client/config';
+import { useEffect, useState } from 'react';
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Badge } from './ui/badge';
+import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
 
 const hauptkategorieValues = ["Obst", "Gemüse", "Kräuter", "Blumen", "Maschine", "Dienstleistung", "Sonstiges"] as const;
 const unterkategorieValues = [

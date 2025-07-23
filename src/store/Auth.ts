@@ -1,9 +1,9 @@
 import { create } from "zustand"
-import { immer } from "zustand/middleware/immer"
 import { persist } from "zustand/middleware"
+import { immer } from "zustand/middleware/immer"
 
-import { AppwriteException, ID, Models } from "appwrite"
 import { account } from "@/models/client/config"
+import { AppwriteException, ID, Models } from "appwrite"
 
 export interface UserPrefs {
     name: string

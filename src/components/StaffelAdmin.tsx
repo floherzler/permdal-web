@@ -1,12 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react';
 import env from "@/app/env";
-import { client } from '@/models/client/config';
-import { format, parse } from "date-fns"
-import { CalendarIcon } from "lucide-react"
-import { databases } from '@/models/client/config';
-import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
 import {
     Dialog,
     DialogContent,
@@ -14,7 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
     Form,
     FormControl,
@@ -23,7 +17,12 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
+import { client } from '@/models/client/config';
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
 
 import {
     Select,
@@ -31,53 +30,52 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
-
-import { useAuthStore } from '@/store/Auth';
+import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
+import { Calendar } from './ui/calendar';
 import { Input } from './ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Calendar } from './ui/calendar';
-import { cn } from '@/lib/utils';
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, type Resolver } from "react-hook-form";
+import { z } from "zod";
 
+// Neuere Zod 4+ Schreibweise mit coerce
 const formSchema = z.object({
     produktID: z.string().min(2, {
         message: "produktID must be at least 2 characters.",
     }),
-    saatDatum: z.date(),
-    euroPreis: z.preprocess((val) => parseFloat(String(val).replace(',', '.')), z.number().min(0.01, {
-        message: "euroPreis muss mindestens 0.01 betragen und mit Punkt getrennt sein.",
-    })),
+    saatDatum: z.coerce.date(),
+    euroPreis: z.coerce
+        .number()
+        .min(0.01, { message: "euroPreis muss mindestens 0.01 betragen und mit Punkt getrennt sein." }),
     einheit: z.enum(["Gramm", "Stück", "Bund", "Strauß"]),
-})
+});
+
+type Input = z.input<typeof formSchema>;
+type Output = z.output<typeof formSchema>;
 
 export function StaffelEditForm({ staffel }: { staffel: Staffel }) {
-    // 1. Define your form.
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    // 1. Define your form mit korrekten Generics
+    const form = useForm<Input, any, Output>({
+        resolver: zodResolver(formSchema) as Resolver<Input, any, Output>,
         defaultValues: {
-            produktID: staffel.produktID, // Assuming you want to edit the produktID as username
-            saatDatum: typeof staffel.saatPflanzDatum === 'string' ? new Date(staffel.saatPflanzDatum) : staffel.saatPflanzDatum,
+            produktID: staffel.produktID,
+            saatDatum: typeof staffel.saatPflanzDatum === 'string'
+                ? new Date(staffel.saatPflanzDatum)
+                : staffel.saatPflanzDatum,
             euroPreis: staffel.euroPreis,
-            einheit: staffel.einheit as "Gramm" | "Stück" | "Bund" | "Strauß",
+            einheit: staffel.einheit as Output['einheit'],
         },
-    })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // Parse the date string back into a date object
-        // if (values.saatDatum) {
-        //     values.saatDatum = values.saatDatum
-        // }
+    });
 
-        // Now you can log the values or perform further actions
+    function onSubmit(values: Output) {
         console.log(format(values.saatDatum, "PPP"));
     }
 
-    console.log(form.formState.errors)
+    console.log(form.formState.errors);
 
     return (
         <Form {...form}>
@@ -91,14 +89,12 @@ export function StaffelEditForm({ staffel }: { staffel: Staffel }) {
                             <FormControl>
                                 <Input placeholder="apfel-boskop" {...field} />
                             </FormControl>
-                            <FormDescription>
-                                ProduktID aus Sortiment.
-                            </FormDescription>
+                            <FormDescription>ProduktID aus Sortiment.</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                {/* add date Picker for saatDatum */}
+
                 <FormField
                     control={form.control}
                     name="saatDatum"
@@ -109,17 +105,15 @@ export function StaffelEditForm({ staffel }: { staffel: Staffel }) {
                                 <PopoverTrigger asChild>
                                     <FormControl>
                                         <Button
-                                            variant={"default"}
+                                            variant="default"
                                             className={cn(
                                                 "w-[240px] pl-3 text-left font-normal",
                                                 !field.value && "text-muted-foreground"
                                             )}
                                         >
-                                            {field.value ? (
-                                                format(field.value, "PPP")
-                                            ) : (
-                                                <span>Pick a date</span>
-                                            )}
+                                            {field.value instanceof Date && !isNaN(field.value.getTime())
+                                                ? format(field.value, "PPP")
+                                                : <span>Pick a date</span>}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
                                     </FormControl>
@@ -127,41 +121,40 @@ export function StaffelEditForm({ staffel }: { staffel: Staffel }) {
                                 <PopoverContent className="w-auto p-0" align="start">
                                     <Calendar
                                         mode="single"
-                                        selected={field.value}
+                                        selected={field.value as Date | undefined}
                                         onSelect={field.onChange}
-                                    // disabled={(date) =>
-                                    // date > new Date() || date < new Date("1900-01-01")
-                                    // }
-                                    // initialFocus={field.value}
                                     />
                                 </PopoverContent>
                             </Popover>
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name="euroPreis"
                     render={({ field }) => (
-                        <FormItem className='w-1/2'>
+                        <FormItem className="w-1/2">
                             <FormLabel>Preis in €</FormLabel>
                             <FormControl>
-                                <Input placeholder="4.99" {...field} />
+                                <Input
+                                    placeholder="4.99"
+                                    {...field}
+                                    value={field.value !== undefined && field.value !== null ? String(field.value) : ""}
+                                />
                             </FormControl>
-                            {/* <FormDescription>
-                    ProduktID aus Sortiment.
-                    </FormDescription> */}
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name="einheit"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Einheit</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger className="w-1/2 text-black">
                                         <SelectValue placeholder="Einheit auswählen..." />
@@ -174,41 +167,35 @@ export function StaffelEditForm({ staffel }: { staffel: Staffel }) {
                                     <SelectItem value="Strauß">Strauß</SelectItem>
                                 </SelectContent>
                             </Select>
-                            {/* <FormDescription>
-                    test
-                </FormDescription> */}
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <Button type="submit">Submit</Button>
             </form>
         </Form>
-    )
+    );
 }
 
 export function StaffelOrderForm({ staffel }: { staffel: Staffel }) {
-    // 1. Define your form.
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<Input, any, Output>({
+        resolver: zodResolver(formSchema) as Resolver<Input, any, Output>,
         defaultValues: {
-            produktID: staffel.produktID, // Assuming you want to edit the produktID as username
-            saatDatum: typeof staffel.saatPflanzDatum === 'string' ? new Date(staffel.saatPflanzDatum) : staffel.saatPflanzDatum,
+            produktID: staffel.produktID,
+            saatDatum: typeof staffel.saatPflanzDatum === 'string'
+                ? new Date(staffel.saatPflanzDatum)
+                : staffel.saatPflanzDatum,
             euroPreis: staffel.euroPreis,
-            einheit: staffel.einheit as "Gramm" | "Stück" | "Bund" | "Strauß",
+            einheit: staffel.einheit as Output['einheit'],
         },
-    })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // Parse the date string back into a date object
-        // if (values.saatDatum) {
-        //     values.saatDatum = values.saatDatum
-        // }
+    });
 
-        // Now you can log the values or perform further actions
+    function onSubmit(values: Output) {
         console.log(format(values.saatDatum, "PPP"));
     }
 
-    console.log(form.formState.errors)
+    console.log(form.formState.errors);
 
     return (
         <Form {...form}>
@@ -222,16 +209,14 @@ export function StaffelOrderForm({ staffel }: { staffel: Staffel }) {
                             <FormControl>
                                 <Input placeholder="apfel-boskop" {...field} />
                             </FormControl>
-                            <FormDescription>
-                                ProduktID aus Sortiment.
-                            </FormDescription>
+                            <FormDescription>ProduktID aus Sortiment.</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
             </form>
         </Form>
-    )
+    );
 }
 
 export default function StaffelAdmin({ initialStaffeln }: { initialStaffeln: Staffel[] }) {
@@ -239,34 +224,25 @@ export default function StaffelAdmin({ initialStaffeln }: { initialStaffeln: Sta
     const db = env.appwrite.db;
     const staffelCollection = env.appwrite.staffel_collection_id;
     const channel = `databases.${db}.collections.${staffelCollection}.documents`;
+
     useEffect(() => {
         const unsubscribe = client.subscribe(channel, (response) => {
             const eventType = response.events[0];
-            console.log(response.events)
-            const changedStaffel = response.payload as Staffel
+            const changedStaffel = response.payload as Staffel;
 
             if (eventType.includes('create')) {
-                setStaffeln((prevStaffeln) => [...prevStaffeln, changedStaffel])
+                setStaffeln((prev) => [...prev, changedStaffel]);
             } else if (eventType.includes('delete')) {
-                setStaffeln((prevStaffeln) => prevStaffeln.filter((staffel) => staffel.$id !== changedStaffel.$id))
+                setStaffeln((prev) => prev.filter((s) => s.$id !== changedStaffel.$id));
             } else if (eventType.includes('update')) {
-                setStaffeln((prevStaffeln) => prevStaffeln.map((staffel) => staffel.$id === changedStaffel.$id ? changedStaffel : staffel))
+                setStaffeln((prev) => prev.map((s) => s.$id === changedStaffel.$id ? changedStaffel : s));
             }
         });
-        return () => unsubscribe()
-    }, [])
-
-    // function handleEdit($id: string): void {
-    //     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    //     const [selectedStaffel, setSelectedStaffel] = useState<Staffel | null>(null);
-
-    //     setSelectedStaffel(staffeln.find((staffel) => staffel.$id === $id) || null);
-    //     setIsDialogOpen(true);
-    // }
+        return () => unsubscribe();
+    }, []);
 
     return (
         <div className="flex flex-wrap gap-4 justify-center pt-8">
-            {/* {user && <h1 className="text-2xl font-bold text-center">Willkommen {user.name}</h1>} */}
             <Table className="w-full max-w-4xl">
                 <TableHeader className="bg-gray-200">
                     <TableRow>
@@ -280,8 +256,6 @@ export default function StaffelAdmin({ initialStaffeln }: { initialStaffeln: Sta
                         <TableCell className="font-bold">Menge Verfügbar</TableCell>
                         <TableCell className="font-bold">Menge Abgeholt</TableCell>
                         <TableCell className="font-bold">Bestellen</TableCell>
-                        {/* <TableCell className="font-bold">Bearbeiten</TableCell>
-                        <TableCell className="font-bold">Löschen</TableCell> */}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -290,7 +264,11 @@ export default function StaffelAdmin({ initialStaffeln }: { initialStaffeln: Sta
                             <TableCell>{staffel.$id}</TableCell>
                             <TableCell>{staffel.produktID}</TableCell>
                             <TableCell>{new Date(staffel.saatPflanzDatum).toDateString()}</TableCell>
-                            <TableCell>{new Date(staffel.ernteProjektion[0]).toDateString()} - {new Date(staffel.ernteProjektion[staffel.ernteProjektion.length - 1]).toDateString()}</TableCell>
+                            <TableCell>
+                                {new Date(staffel.ernteProjektion[0]).toDateString()} -
+                                {' '}
+                                {new Date(staffel.ernteProjektion[staffel.ernteProjektion.length - 1]).toDateString()}
+                            </TableCell>
                             <TableCell>{staffel.menge}</TableCell>
                             <TableCell>{staffel.einheit}</TableCell>
                             <TableCell>{staffel.euroPreis}€</TableCell>
@@ -310,40 +288,10 @@ export default function StaffelAdmin({ initialStaffeln }: { initialStaffeln: Sta
                                     </DialogContent>
                                 </Dialog>
                             </TableCell>
-                            {/* <TableCell>
-                                <Dialog>
-                                    <DialogTrigger>Bearbeiten</DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Staffel Bearbeiten</DialogTitle>
-                                            <DialogDescription>
-                                                Hier können Sie die Staffel bearbeiten.
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <StaffelEditForm staffel={staffel} />
-                                    </DialogContent>
-                                </Dialog>
-                            {/* <TableCell>
-                                <Dialog>
-                                    <DialogTrigger>Bearbeiten</DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Staffel Bearbeiten</DialogTitle>
-                                            <DialogDescription>
-                                                Hier können Sie die Staffel bearbeiten.
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <StaffelEditForm staffel={staffel} />
-                                    </DialogContent>
-                                </Dialog>
-                            </TableCell>
-                            <TableCell>
-                                <button className="bg-red-100 hover:bg-red-200 text-white font-bold py-2 px-4 rounded">❌</button>
-                            </TableCell> */}
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
         </div>
     );
-};
+}

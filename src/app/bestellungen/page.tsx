@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import { databases } from "@/models/client/config";
 import env from "@/app/env";
-import BlogPostList from "@/components/BlogPostList";
 import BestellungsList from "@/components/BestellungsList";
 
 export default function Page() {

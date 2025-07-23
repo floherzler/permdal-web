@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react';
 import env from "@/app/env";
 import { client } from '@/models/client/config';
-import { databases } from '@/models/client/config';
-import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
 import { useAuthStore } from '@/store/Auth';
+import { useEffect, useState } from 'react';
+import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
 
 export default function StaffelList({ initialStaffeln }: { initialStaffeln: Staffel[] }) {
   const [staffeln, setStaffeln] = useState<Staffel[]>(initialStaffeln);

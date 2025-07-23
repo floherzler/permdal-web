@@ -1,6 +1,6 @@
 import env from "@/app/env"
 
-import { Client, Account, Databases, Avatars, Storage } from "appwrite"
+import { Account, Avatars, Client, Databases, Storage } from "appwrite"
 
 const client = new Client()
     .setEndpoint(env.appwrite.endpoint)
@@ -11,4 +11,4 @@ const account = new Account(client)
 const avatars = new Avatars(client)
 const storage = new Storage(client)
 
-export { client, databases, account, avatars, storage }
+export { account, avatars, client, databases, storage }

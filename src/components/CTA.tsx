@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function CTA() {
   return (
@@ -16,18 +15,18 @@ export default function CTA() {
       {/* Content Wrapper */}
       <div className="relative z-10 flex flex-col items-center w-full">
         <div className="p-4"></div>
-          <img
-            src="/img/permdal-logo.png"
-            alt="Agroforst Frank Fege"
-            className="w-1/2 h-1/3 rounded-xl bg-white bg-opacity-25 p-2"
-          />
-        </div>
+        <img
+          src="/img/permdal-logo.png"
+          alt="Agroforst Frank Fege"
+          className="w-1/2 h-1/3 rounded-xl bg-white bg-opacity-25 p-2"
+        />
+      </div>
 
-        {/* Subheading */}
-        <div className="relative z-10 flex flex-col items-center w-full">
-          <h2 className="text-2xl font-medium mt-4 text-white">
-            Produkte aus Prignitzer Permakultur.
-          </h2>
+      {/* Subheading */}
+      <div className="relative z-10 flex flex-col items-center w-full">
+        <h2 className="text-2xl font-medium mt-4 text-white">
+          Produkte aus Prignitzer Permakultur.
+        </h2>
 
         {/* CTA Button */}
         <a

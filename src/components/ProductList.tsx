@@ -1,49 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react';
 import env from "@/app/env";
 import { client } from '@/models/client/config';
-import { format, parse } from "date-fns"
-import { CalendarIcon } from "lucide-react"
-import { databases } from '@/models/client/config';
+import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 
 
-import { useAuthStore } from '@/store/Auth';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Calendar } from './ui/calendar';
-import { cn } from '@/lib/utils';
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+
+import { z } from "zod";
 
 const formSchema = z.object({
     produktID: z.string().min(2, {
