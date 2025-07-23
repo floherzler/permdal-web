@@ -41,7 +41,7 @@ export default function ProduktListe({ initialProdukte }: { initialProdukte: Pro
             }
         });
         return () => unsubscribe()
-    }, [])
+    }, [channel])
 
     return (
         <div className="flex flex-wrap gap-4 justify-center pt-8">

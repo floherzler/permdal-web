@@ -59,8 +59,8 @@ type Output = z.output<typeof formSchema>;
 
 export function StaffelEditForm({ staffel }: { staffel: Staffel }) {
     // 1. Define your form mit korrekten Generics
-    const form = useForm<Input, any, Output>({
-        resolver: zodResolver(formSchema) as Resolver<Input, any, Output>,
+    const form = useForm<Input, unknown, Output>({
+        resolver: zodResolver(formSchema) as Resolver<Input, unknown, Output>,
         defaultValues: {
             produktID: staffel.produktID,
             saatDatum: typeof staffel.saatPflanzDatum === 'string'
@@ -179,8 +179,8 @@ export function StaffelEditForm({ staffel }: { staffel: Staffel }) {
 }
 
 export function StaffelOrderForm({ staffel }: { staffel: Staffel }) {
-    const form = useForm<Input, any, Output>({
-        resolver: zodResolver(formSchema) as Resolver<Input, any, Output>,
+    const form = useForm<Input, unknown, Output>({
+        resolver: zodResolver(formSchema) as Resolver<Input, unknown, Output>,
         defaultValues: {
             produktID: staffel.produktID,
             saatDatum: typeof staffel.saatPflanzDatum === 'string'
@@ -239,7 +239,7 @@ export default function StaffelAdmin({ initialStaffeln }: { initialStaffeln: Sta
             }
         });
         return () => unsubscribe();
-    }, []);
+    }, [channel]);
 
     return (
         <div className="flex flex-wrap gap-4 justify-center pt-8">

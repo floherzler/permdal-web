@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import React from "react";
 
 
-const Layout = ({children}: {children: React.ReactNode}) => {
-  const {session, user} = useAuthStore();
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const { session, user } = useAuthStore();
   const router = useRouter()
 
   React.useEffect(() => {
@@ -19,7 +19,7 @@ const Layout = ({children}: {children: React.ReactNode}) => {
         router.push('/')
       }
     }
-  }, [session, router])
+  }, [session, user, router])
 
   if (session) {
     return null

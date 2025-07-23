@@ -25,7 +25,7 @@ export default function BestellungsList({ initialBestellungen }: { initialBestel
             }
         });
         return () => unsubscribe()
-    }, [])
+    }, [channel])
 
     return (
         <div className="flex flex-wrap gap-4 justify-center pt-8">

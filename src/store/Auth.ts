@@ -62,7 +62,7 @@ export const useAuthStore = create<AuthState>()(
                 });
             },
 
-            async updateUser(user: Models.User<UserPrefs>) {
+            async updateUser() {
                 try {
                     const updatedUser = await account.get<UserPrefs>();
                     set((state) => {

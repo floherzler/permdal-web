@@ -1,13 +1,13 @@
 'use client'
 
 import env from "@/app/env";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { client, databases } from '@/models/client/config';
 import { useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Badge } from './ui/badge';
+// import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -92,24 +92,37 @@ function ProduktForm({ produkt, onSubmit }: { produkt?: Produkt, onSubmit: (valu
     const form = useForm<z.infer<typeof formSchema>>({
         defaultValues: produkt
             ? {
+                // **Text/ID fields** always controlled with ""
+                id: produkt.$id ?? "",
                 name: produkt.name ?? "",
                 sorte: produkt.sorte ?? "",
-                id: produkt.$id,
-                hauptkategorie: hauptkategorieValues.includes(produkt.hauptkategorie as typeof hauptkategorieValues[number])
+                // **Selects** must be either one of the allowed strings or undefined
+                hauptkategorie: hauptkategorieValues.includes(
+                    produkt.hauptkategorie as typeof hauptkategorieValues[number],
+                )
                     ? (produkt.hauptkategorie as typeof hauptkategorieValues[number])
                     : undefined,
-                unterkategorie: unterkategorieValues.includes(produkt.unterkategorie as typeof unterkategorieValues[number])
+                unterkategorie: unterkategorieValues.includes(
+                    produkt.unterkategorie as typeof unterkategorieValues[number],
+                )
                     ? (produkt.unterkategorie as typeof unterkategorieValues[number])
                     : undefined,
-                lebensdauer: lebensdauerValues.includes(produkt.lebensdauer as typeof lebensdauerValues[number])
+                lebensdauer: lebensdauerValues.includes(
+                    produkt.lebensdauer as typeof lebensdauerValues[number],
+                )
                     ? (produkt.lebensdauer as typeof lebensdauerValues[number])
                     : undefined,
+                // **Arrays** stay as `[]` if missing
                 fruchtfolge_vor: produkt.fruchtfolge_vor ?? [],
                 fruchtfolge_nach: produkt.fruchtfolge_nach ?? [],
-                bodenansprueche: Array.isArray(produkt.bodenansprueche) ? produkt.bodenansprueche : [],
+                bodenansprueche: Array.isArray(produkt.bodenansprueche)
+                    ? produkt.bodenansprueche
+                    : [],
                 begleitpflanzen: produkt.begleitpflanzen ?? [],
             }
             : {
+                // **New** → text/ID = ""; selects = undefined; arrays = []
+                id: "",
                 name: "",
                 sorte: "",
                 hauptkategorie: undefined,
@@ -120,16 +133,19 @@ function ProduktForm({ produkt, onSubmit }: { produkt?: Produkt, onSubmit: (valu
                 bodenansprueche: [],
                 begleitpflanzen: [],
             },
-    })
+    });
+
+
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField control={form.control} name="id" render={({ field }) => (<FormItem><FormLabel>ID (name-sorte)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white space-y-8">
                 <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="sorte" render={({ field }) => (<FormItem><FormLabel>Sorte</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="id" render={({ field }) => (<FormItem><FormLabel>ID (name-sorte)</FormLabel><FormControl><Input {...field} placeholder="zB. name-sorte" /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="hauptkategorie" render={({ field }) => (<FormItem><FormLabel>Hauptkategorie</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="text-black">
-                    <SelectValue placeholder="Wähle eine Kategorie" /></SelectTrigger></FormControl><SelectContent>
+                    <SelectValue placeholder="Wähle eine Kategorie" /></SelectTrigger></FormControl>
+                    <SelectContent className="max-h-60 overflow-y-auto bg-white">
                         <SelectItem value="Obst">Obst</SelectItem>
                         <SelectItem value="Gemüse">Gemüse</SelectItem>
                         <SelectItem value="Kräuter">Kräuter</SelectItem>
@@ -140,7 +156,7 @@ function ProduktForm({ produkt, onSubmit }: { produkt?: Produkt, onSubmit: (valu
                     </SelectContent></Select><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="unterkategorie" render={({ field }) => (<FormItem><FormLabel>Unterkategorie</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="text-black"><SelectValue placeholder="Wähle eine Unterkategorie" /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent className="max-h-60 overflow-y-auto bg-white">
                         <SelectItem value="Hülsenfrüchte">Hülsenfrüchte</SelectItem>
                         <SelectItem value="Kohlgemüse">Kohlgemüse</SelectItem>
                         <SelectItem value="Wurzel-/Knollengemüse">Wurzel-/Knollengemüse</SelectItem>
@@ -162,14 +178,16 @@ function ProduktForm({ produkt, onSubmit }: { produkt?: Produkt, onSubmit: (valu
                 <FormField control={form.control} name="fruchtfolge_nach" render={({ field }) => <ArrayInput field={field} label="Fruchtfolge Nach" />} />
                 <FormField control={form.control} name="bodenansprueche" render={({ field }) => <ArrayInput field={field} label="Bodenansprüche" />} />
                 <FormField control={form.control} name="begleitpflanzen" render={({ field }) => <ArrayInput field={field} label="Begleitpflanzen" />} /> */}
-                <Button type="submit">Abschicken</Button>
+                <DialogClose asChild>
+                    <Button type="submit" className="bg-green-800 text-white">Abschicken</Button>
+                </DialogClose>
             </form>
         </Form>
     )
 }
 
 export default function ZentraleAdmin({ initialStaffeln, initialProdukte }: { initialStaffeln: Staffel[], initialProdukte: Produkt[] }) {
-    const [staffeln, setStaffeln] = useState<Staffel[]>(initialStaffeln);
+    const [, setStaffeln] = useState<Staffel[]>(initialStaffeln);
     const [produkte, setProdukte] = useState<Produkt[]>(initialProdukte);
     const db = env.appwrite.db;
     const staffelCollection = env.appwrite.staffel_collection_id;
@@ -193,7 +211,8 @@ export default function ZentraleAdmin({ initialStaffeln, initialProdukte }: { in
 
     async function updateProdukt(id: string, values: z.infer<typeof formSchema>) {
         try {
-            const { id: _id, ...data } = values;
+            const { id, ...data } = values;
+            if (!id) throw new Error("Produkt ID is required for update.");
             await databases.updateDocument(
                 db,
                 produktCollection,
@@ -236,24 +255,37 @@ export default function ZentraleAdmin({ initialStaffeln, initialProdukte }: { in
             staffelUnsubscribe();
             produktUnsubscribe();
         }
-    }, [])
+    }, [staffelChannel, produktChannel])
 
     return (
-        <div className="flex flex-col gap-8 justify-center pt-8">
+        <div className="flex gap-8 justify-center pt-8">
             <div>
                 <h2 className="text-2xl font-bold text-center mb-4">Produkte</h2>
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button>Produkt zum Katalog hinzufügen</Button>
+                        <Button className="bg-green-800 text-white hover:bg-green-700">
+                            Produkt zum Katalog hinzufügen
+                        </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-h-[90vh] overflow-y-auto">
+
+                    <DialogContent
+                        className="
+                        bg-white            /* make the panel white */
+                        p-6                 /* add some padding */
+                        rounded-lg          /* soften the corners */
+                        shadow-lg           /* lift it off the page */
+                        max-h-[90vh]
+                        overflow-y-auto
+                        "
+                    >
                         <DialogHeader>
                             <DialogTitle>Neues Produkt erstellen</DialogTitle>
                         </DialogHeader>
                         <ProduktForm onSubmit={createProdukt} />
                     </DialogContent>
                 </Dialog>
-                <Table className="w-full max-w-4xl mt-4">
+
+                <Table className="w-full table-fixed">
                     <TableHeader className="bg-gray-200">
                         <TableRow>
                             <TableCell className="font-bold">ProduktID</TableCell>
@@ -277,7 +309,16 @@ export default function ZentraleAdmin({ initialStaffeln, initialProdukte }: { in
                                         <DialogTrigger asChild>
                                             <Button>Bearbeiten</Button>
                                         </DialogTrigger>
-                                        <DialogContent className="max-h-[90vh] overflow-y-auto">
+                                        <DialogContent
+                                            className="
+                                            bg-white            /* make the panel white */
+                                            p-6                 /* add some padding */
+                                            rounded-lg          /* soften the corners */
+                                            shadow-lg           /* lift it off the page */
+                                            max-h-[90vh]
+                                            overflow-y-auto
+                                            "
+                                        >
                                             <DialogHeader>
                                                 <DialogTitle>Produkt Bearbeiten</DialogTitle>
                                             </DialogHeader>

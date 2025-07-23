@@ -11,7 +11,7 @@ export default function StaffelList({ initialStaffeln }: { initialStaffeln: Staf
   const db = env.appwrite.db;
   const staffelCollection = env.appwrite.staffel_collection_id;
   const channel = `databases.${db}.collections.${staffelCollection}.documents`;
-  const { user } = useAuthStore();
+  // const { user } = useAuthStore();
   useEffect(() => {
     const unsubscribe = client.subscribe(channel, (response) => {
       const eventType = response.events[0];
@@ -27,7 +27,7 @@ export default function StaffelList({ initialStaffeln }: { initialStaffeln: Staf
       }
     });
     return () => unsubscribe()
-  }, [])
+  }, [channel])
 
   return (
     <div className="flex flex-wrap gap-4 justify-center pt-8">
