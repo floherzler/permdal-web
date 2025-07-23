@@ -8,18 +8,18 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
 
 
 
-import { z } from "zod";
+// import { z } from "zod";
 
-const formSchema = z.object({
-    produktID: z.string().min(2, {
-        message: "produktID must be at least 2 characters.",
-    }),
-    saatDatum: z.date(),
-    euroPreis: z.preprocess((val) => parseFloat(String(val).replace(',', '.')), z.number().min(0.01, {
-        message: "euroPreis muss mindestens 0.01 betragen und mit Punkt getrennt sein.",
-    })),
-    einheit: z.enum(["Gramm", "Stück", "Bund", "Strauß"]),
-})
+// const formSchema = z.object({
+//     produktID: z.string().min(2, {
+//         message: "produktID must be at least 2 characters.",
+//     }),
+//     saatDatum: z.date(),
+//     euroPreis: z.preprocess((val) => parseFloat(String(val).replace(',', '.')), z.number().min(0.01, {
+//         message: "euroPreis muss mindestens 0.01 betragen und mit Punkt getrennt sein.",
+//     })),
+//     einheit: z.enum(["Gramm", "Stück", "Bund", "Strauß"]),
+// })
 
 export default function ProduktListe({ initialProdukte }: { initialProdukte: Produkt[] }) {
     const [produkte, setProdukte] = useState<Produkt[]>(initialProdukte);

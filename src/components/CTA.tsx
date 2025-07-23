@@ -1,4 +1,6 @@
 
+import Image from 'next/image';
+
 export default function CTA() {
   return (
     <div
@@ -8,9 +10,11 @@ export default function CTA() {
       {/* Content Wrapper */}
       <div className="relative z-10 flex flex-col items-center w-full">
         <div className="p-4"></div>
-        <img
+        <Image
           src="/img/permdal-logo.png"
           alt="Agroforst Frank Fege"
+          width={200}
+          height={120}
           className="w-1/2 h-1/3 rounded-xl bg-white bg-opacity-25 p-2"
         />
       </div>

@@ -8,7 +8,6 @@ import {
 import Image from "next/image";
 
 import { useAuthStore } from '@/store/Auth';
-import Link from "next/link";
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();

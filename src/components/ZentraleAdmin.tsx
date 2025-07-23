@@ -42,51 +42,51 @@ const formSchema = z.object({
     begleitpflanzen: z.array(z.string()).optional(),
 })
 
-function ArrayInput({ field, label }: { field: any, label: string }) {
-    const [inputValue, setInputValue] = useState('');
+// function ArrayInput({ field, label }: { field: any, label: string }) {
+//     const [inputValue, setInputValue] = useState('');
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(e.target.value);
-    };
+//     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//         setInputValue(e.target.value);
+//     };
 
-    const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            if (inputValue.trim() !== '') {
-                field.onChange([...(field.value || []), inputValue.trim()]);
-                setInputValue('');
-            }
-        }
-    };
+//     const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+//         if (e.key === 'Enter') {
+//             e.preventDefault();
+//             if (inputValue.trim() !== '') {
+//                 field.onChange([...(field.value || []), inputValue.trim()]);
+//                 setInputValue('');
+//             }
+//         }
+//     };
 
-    const removeItem = (index: number) => {
-        const newValue = [...(field.value || [])];
-        newValue.splice(index, 1);
-        field.onChange(newValue);
-    };
+//     const removeItem = (index: number) => {
+//         const newValue = [...(field.value || [])];
+//         newValue.splice(index, 1);
+//         field.onChange(newValue);
+//     };
 
-    return (
-        <FormItem>
-            <FormLabel>{label}</FormLabel>
-            <FormControl>
-                <Input
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onKeyDown={handleInputKeyDown}
-                />
-            </FormControl>
-            <div className="flex flex-wrap gap-2 mt-2">
-                {(field.value || []).map((item: string, index: number) => (
-                    <Badge key={index} variant="secondary">
-                        {item}
-                        <button type="button" onClick={() => removeItem(index)} className="ml-2 text-red-500">x</button>
-                    </Badge>
-                ))}
-            </div>
-            <FormMessage />
-        </FormItem>
-    );
-}
+//     return (
+//         <FormItem>
+//             <FormLabel>{label}</FormLabel>
+//             <FormControl>
+//                 <Input
+//                     value={inputValue}
+//                     onChange={handleInputChange}
+//                     onKeyDown={handleInputKeyDown}
+//                 />
+//             </FormControl>
+//             <div className="flex flex-wrap gap-2 mt-2">
+//                 {(field.value || []).map((item: string, index: number) => (
+//                     <Badge key={index} variant="secondary">
+//                         {item}
+//                         <button type="button" onClick={() => removeItem(index)} className="ml-2 text-red-500">x</button>
+//                     </Badge>
+//                 ))}
+//             </div>
+//             <FormMessage />
+//         </FormItem>
+//     );
+// }
 
 function ProduktForm({ produkt, onSubmit }: { produkt?: Produkt, onSubmit: (values: z.infer<typeof formSchema>) => void }) {
     const form = useForm<z.infer<typeof formSchema>>({
