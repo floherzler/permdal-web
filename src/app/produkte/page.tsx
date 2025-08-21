@@ -7,6 +7,8 @@ import env from "@/app/env";
 import { Query, Models } from "appwrite";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Search as SearchIcon } from "lucide-react";
 
 type Produkt = {
     $id: string;
@@ -29,11 +31,14 @@ const DB = env.appwrite.db;
 const PRODUKTE = env.appwrite.produce_collection_id;
 const ANGEBOTE = env.appwrite.angebote_collection_id;
 
-// Use the exact values you store in Appwrite:
+// exact DB values:
 const KATS = ["Obst", "Gemüse", "Kräuter", "Maschine", "Sonstiges"] as const;
 
 export default function ProdukteKatalogPage() {
     const [selectedKat, setSelectedKat] = useState<(typeof KATS)[number]>("Obst");
+    const [search, setSearch] = useState("");
+    const debouncedSearch = useDebounce(search, 300);
+
     const [produkte, setProdukte] = useState<Produkt[]>([]);
     const [angeboteCount, setAngeboteCount] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
@@ -42,16 +47,22 @@ export default function ProdukteKatalogPage() {
         (async () => {
             setLoading(true);
             try {
-                // 1) Produkte der gewählten Hauptkategorie
-                const prodRes = await databases.listDocuments(DB, PRODUKTE, [
+                // Build product query
+                const q: string[] = [
                     Query.equal("hauptkategorie", selectedKat),
                     Query.orderAsc("name"),
                     Query.limit(200),
-                ]);
+                ];
+                if (debouncedSearch.trim().length > 0) {
+                    // requires Full-Text index on 'name'
+                    q.push(Query.search("name", debouncedSearch.trim()));
+                }
+
+                const prodRes = await databases.listDocuments(DB, PRODUKTE, q);
                 const list: Produkt[] = prodRes.documents.map(mapProdukt);
                 setProdukte(list);
 
-                // 2) Angebots-Counts in einem Request (produktID IN [...])
+                // Angebote-Counts for visible products
                 if (list.length) {
                     const ids = list.map((p) => p.$id);
                     const anRes = await databases.listDocuments(DB, ANGEBOTE, [
@@ -70,20 +81,29 @@ export default function ProdukteKatalogPage() {
                 setLoading(false);
             }
         })();
-    }, [selectedKat]);
+    }, [selectedKat, debouncedSearch]);
 
     return (
         <main className="min-h-screen container mx-auto p-4 space-y-4">
-            <header className="flex items-end justify-between">
+            <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold">Katalog</h1>
                     <p className="text-sm text-muted-foreground">
                         {loading ? "Laden…" : `${produkte.length} Produkte`}
                     </p>
                 </div>
-                <Link href="/staffeln" className="text-blue-600 hover:underline">
-                    Zu den Angeboten
-                </Link>
+
+                {/* Search bar */}
+                <div className="relative w-full md:w-80">
+                    <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <Input
+                        className="pl-8"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Im Katalog suchen (Name)…"
+                        aria-label="Produkte suchen"
+                    />
+                </div>
             </header>
 
             {/* Styled Tabs */}
@@ -112,7 +132,7 @@ export default function ProdukteKatalogPage() {
                 </TabsList>
             </Tabs>
 
-            {/* Grid der Produkte */}
+            {/* Grid */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {produkte.map((p) => {
                     const count = angeboteCount[p.$id] ?? 0;
@@ -157,10 +177,12 @@ export default function ProdukteKatalogPage() {
 }
 
 function mapProdukt(doc: any): Produkt {
-    // saisonalitaet → robuste number[] 1..12
     const raw = Array.isArray(doc.saisonalitaet) ? doc.saisonalitaet : [];
-    const mapped: number[] = raw.map((m: any) => (typeof m === "string" ? parseInt(m, 10) : m));
-    const saisonalitaet: number[] = [...new Set<number>(mapped)]
+    const saisonalitaet: number[] = [
+        ...new Set<number>(
+            raw.map((m: any) => (typeof m === "string" ? parseInt(m, 10) : m))
+        ),
+    ]
         .filter((n: any) => Number.isFinite(n) && n >= 1 && n <= 12)
         .sort((a, b) => a - b);
 
@@ -180,7 +202,17 @@ function mapProdukt(doc: any): Produkt {
     };
 }
 
-/** Saisonalität als durchgehende(n) Balken über 12 Monate (unterstützt Lücken & Wrap-Around) */
+/** Debounce helper */
+function useDebounce<T>(value: T, delay = 300) {
+    const [v, setV] = useState(value);
+    useEffect(() => {
+        const t = setTimeout(() => setV(value), delay);
+        return () => clearTimeout(t);
+    }, [value, delay]);
+    return v;
+}
+
+/** Season bands (unchanged) */
 function Saisonalitaet({ months }: { months: number[] }) {
     const segments = useMemo(() => computeSegments(months), [months]);
     const monthWidth = 100 / 12;
@@ -190,7 +222,6 @@ function Saisonalitaet({ months }: { months: number[] }) {
             <div className="text-xs text-muted-foreground mb-1">Saisonalität</div>
 
             <div className="relative">
-                {/* Baseline: 12 Zellen mit Monats-Kürzeln */}
                 <div className="grid grid-cols-12 gap-px h-8">
                     {Array.from({ length: 12 }, (_, i) => (
                         <div key={i} className="bg-muted/60 rounded-[2px] flex items-center justify-center">
@@ -201,7 +232,6 @@ function Saisonalitaet({ months }: { months: number[] }) {
                     ))}
                 </div>
 
-                {/* Overlay: Saison-Bänder */}
                 {segments.map((seg, idx) => (
                     <div
                         key={idx}
@@ -224,7 +254,6 @@ function Saisonalitaet({ months }: { months: number[] }) {
 }
 
 function computeSegments(months: number[]) {
-    // boolean map 1..12
     const present = new Array<boolean>(13).fill(false);
     months.forEach((m) => {
         if (Number.isFinite(m) && m >= 1 && m <= 12) present[m] = true;
@@ -233,14 +262,13 @@ function computeSegments(months: number[]) {
     const segs: { start: number; len: number }[] = [];
     for (let m = 1; m <= 12; m++) {
         const prev = m === 1 ? 12 : m - 1;
-        // Start eines neuen Segments: Monat ist aktiv, Vormonat nicht
         if (present[m] && !present[prev]) {
             let len = 1;
             let k = m === 12 ? 1 : m + 1;
             while (present[k] && k !== m) {
                 len++;
                 k = k === 12 ? 1 : k + 1;
-                if (len >= 12) break; // Volltreffer (alle Monate)
+                if (len >= 12) break;
             }
             segs.push({ start: m, len });
         }
@@ -249,10 +277,8 @@ function computeSegments(months: number[]) {
 }
 
 function endOf(seg: { start: number; len: number }) {
-    // inklusives Ende (1..12)
     return ((seg.start + seg.len - 2) % 12) + 1;
 }
-
 function monthName(n: number) {
     return ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"][n - 1] ?? String(n);
 }
