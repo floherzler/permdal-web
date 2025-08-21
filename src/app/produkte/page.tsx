@@ -99,55 +99,18 @@ export default function ProdukteKatalogPage() {
     return (
         <main className="min-h-screen container mx-auto p-4 space-y-4">
             {/* Top bar: title + search + view switch */}
-            {/* --- Top controls (2-row responsive grid) --- */}
-            <section className="grid grid-cols-12 gap-4">
-                {/* Row 1: Title + count */}
-                <div className="col-span-12 lg:col-span-8">
-                    <h1 className="text-3xl font-bold">Katalog</h1>
-                    <p className="text-sm text-muted-foreground">
-                        {loading ? "Laden…" : `${produkte.length} Produkte`}
-                    </p>
-                </div>
+            {/* --- Top controls (title+tabs on left, single toolbar on right) --- */}
+            <section className="grid grid-cols-12 gap-4 items-start">
+                {/* Left: Title + count + Category tabs */}
+                <div className="col-span-12 lg:col-span-8 space-y-3">
+                    <div>
+                        <h1 className="text-3xl font-bold">Katalog</h1>
+                        <p className="text-sm text-muted-foreground">
+                            {loading ? "Laden…" : `${produkte.length} Produkte`}
+                        </p>
+                    </div>
 
-                {/* Row 1: View switch (right) */}
-                {/* <div className="col-span-12 lg:col-span-4 flex lg:justify-end">
-                    <Tabs value={view} onValueChange={(v) => setView(v as ViewMode)}>
-                        <TabsList
-                            className="
-          flex gap-1 rounded-xl
-          bg-emerald-50/60 border border-emerald-100 p-1
-        "
-                        >
-                            <TabsTrigger
-                                value="cards"
-                                className="
-            rounded-lg px-3 py-1.5 text-sm
-            data-[state=active]:bg-emerald-200/60
-            data-[state=active]:text-emerald-900
-            data-[state=active]:shadow-sm
-            hover:bg-emerald-100/40 transition
-          "
-                            >
-                                Karten
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="table"
-                                className="
-            rounded-lg px-3 py-1.5 text-sm
-            data-[state=active]:bg-emerald-200/60
-            data-[state=active]:text-emerald-900
-            data-[state=active]:shadow-sm
-            hover:bg-emerald-100/40 transition
-          "
-                            >
-                                Tabelle
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                </div> */}
-
-                {/* Row 2: Category tabs (left) */}
-                <div className="col-span-12 lg:col-span-8">
+                    {/* Category tabs */}
                     <Tabs value={selectedKat} onValueChange={(v) => setSelectedKat(v as any)}>
                         <TabsList
                             className="
@@ -174,27 +137,79 @@ export default function ProdukteKatalogPage() {
                     </Tabs>
                 </div>
 
-                {/* Row 2: Search (right) */}
+                {/* Right: Single toolbar (Search + View switch) */}
                 <div className="col-span-12 lg:col-span-4">
-                    <div className="relative w-full">
-                        <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                        <Input
-                            className="pl-8 w-full"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Suche (Name oder Sorte)…"
-                            aria-label="Produkte suchen"
-                        />
+                    <div
+                        className="
+        flex flex-col gap-2 rounded-xl border bg-white/70
+        backdrop-blur supports-[backdrop-filter]:bg-white/60
+        p-2 shadow-sm lg:sticky lg:top-2
+      "
+                        role="region"
+                        aria-label="Ansicht & Suche"
+                    >
+                        <div className="flex items-center gap-2">
+                            {/* Search */}
+                            <div className="relative flex-1">
+                                <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                <Input
+                                    className="pl-8 w-full"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Suche (Name oder Sorte)…"
+                                    aria-label="Produkte suchen"
+                                />
+                            </div>
+
+                            {/* View switch */}
+                            <Tabs value={view} onValueChange={(v) => setView(v as ViewMode)}>
+                                <TabsList
+                                    className="
+              flex gap-1 rounded-lg
+              bg-emerald-50/60 border border-emerald-100 p-1
+            "
+                                >
+                                    <TabsTrigger
+                                        value="cards"
+                                        className="
+                rounded-md px-3 py-1.5 text-sm shrink-0
+                data-[state=active]:bg-emerald-200/60
+                data-[state=active]:text-emerald-900
+                data-[state=active]:shadow-sm
+                hover:bg-emerald-100/40 transition
+              "
+                                    >
+                                        Karten
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="table"
+                                        className="
+                rounded-md px-3 py-1.5 text-sm shrink-0
+                data-[state=active]:bg-emerald-200/60
+                data-[state=active]:text-emerald-900
+                data-[state=active]:shadow-sm
+                hover:bg-emerald-100/40 transition
+              "
+                                    >
+                                        Tabelle
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+                        </div>
                     </div>
                 </div>
             </section>
 
+
+
             {/* Content */}
-            {view === "cards" ? (
-                <CardsView produkte={produkte} angeboteCount={angeboteCount} />
-            ) : (
-                <TableView produkte={produkte} angeboteCount={angeboteCount} />
-            )}
+            {
+                view === "cards" ? (
+                    <CardsView produkte={produkte} angeboteCount={angeboteCount} />
+                ) : (
+                    <TableView produkte={produkte} angeboteCount={angeboteCount} />
+                )
+            }
 
             <div className="flex justify-between items-center">
                 <Link href="/staffeln" className="text-blue-600 hover:underline">
@@ -204,7 +219,7 @@ export default function ProdukteKatalogPage() {
                     <div className="text-sm text-muted-foreground">Keine Produkte gefunden.</div>
                 )}
             </div>
-        </main>
+        </main >
     );
 }
 
