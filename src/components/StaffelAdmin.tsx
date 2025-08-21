@@ -222,7 +222,7 @@ export function StaffelOrderForm({ staffel }: { staffel: Staffel }) {
 export default function StaffelAdmin({ initialStaffeln }: { initialStaffeln: Staffel[] }) {
     const [staffeln, setStaffeln] = useState<Staffel[]>(initialStaffeln);
     const db = env.appwrite.db;
-    const staffelCollection = env.appwrite.staffel_collection_id;
+    const staffelCollection = env.appwrite.angebote_collection_id;
     const channel = `databases.${db}.collections.${staffelCollection}.documents`;
 
     useEffect(() => {

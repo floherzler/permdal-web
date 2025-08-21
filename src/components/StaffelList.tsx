@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
 export default function StaffelList({ initialStaffeln }: { initialStaffeln: Staffel[] }) {
   const [staffeln, setStaffeln] = useState<Staffel[]>(initialStaffeln);
   const db = env.appwrite.db;
-  const staffelCollection = env.appwrite.staffel_collection_id;
+  const staffelCollection = env.appwrite.angebote_collection_id;
   const channel = `databases.${db}.collections.${staffelCollection}.documents`;
   // const { user } = useAuthStore();
   useEffect(() => {

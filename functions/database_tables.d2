@@ -1,5 +1,5 @@
 direction: right
-produkt: {
+katalog: {
   shape: sql_table
 
   produkt_id: String {constraint: primary_key}
@@ -81,7 +81,7 @@ user: {
   user_label: Enum(none|admin|dev|privatKunde|businessKunde)
 }
 
-produkt -> angebot: hat {
+katalog -> angebot: hat {
   source-arrowhead: 1
   target-arrowhead: N
   # style.animated: true
@@ -101,6 +101,6 @@ bestellung -> angebot: besteht aus {
 
 user -> mitgliedschaft: hat {
   source-arrowhead: 1
-  target-arrowhead: 1
+  target-arrowhead: 0..1
   # style.animated: true
 }

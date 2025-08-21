@@ -7,7 +7,7 @@ export async function getStaffeln(): Promise<Staffel[]> {
     console.log("Fetching staffeln...")
     const response = await databases.listDocuments(
         env.appwrite.db,
-        env.appwrite.staffel_collection_id,
+        env.appwrite.angebote_collection_id,
     )
     response.documents.forEach((doc) => console.log(doc.$id))
 

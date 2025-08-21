@@ -18,7 +18,7 @@ export default function Page() {
         ),
         databases.listDocuments(
           env.appwrite.db,
-          env.appwrite.staffel_collection_id
+          env.appwrite.angebote_collection_id
         ),
       ]);
 

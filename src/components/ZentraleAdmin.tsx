@@ -190,7 +190,7 @@ export default function ZentraleAdmin({ initialStaffeln, initialProdukte }: { in
     const [, setStaffeln] = useState<Staffel[]>(initialStaffeln);
     const [produkte, setProdukte] = useState<Produkt[]>(initialProdukte);
     const db = env.appwrite.db;
-    const staffelCollection = env.appwrite.staffel_collection_id;
+    const staffelCollection = env.appwrite.angebote_collection_id;
     const produktCollection = env.appwrite.produce_collection_id;
     const staffelChannel = `databases.${db}.collections.${staffelCollection}.documents`;
     const produktChannel = `databases.${db}.collections.${produktCollection}.documents`;
