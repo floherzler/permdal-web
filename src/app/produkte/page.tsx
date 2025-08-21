@@ -9,6 +9,9 @@ import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Search as SearchIcon } from "lucide-react";
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+} from "@/components/ui/table";
 
 type Produkt = {
     $id: string;
@@ -31,11 +34,14 @@ const DB = env.appwrite.db;
 const PRODUKTE = env.appwrite.produce_collection_id;
 const ANGEBOTE = env.appwrite.angebote_collection_id;
 
-// exact DB values:
+// Exact values from your DB:
 const KATS = ["Obst", "Gemüse", "Kräuter", "Maschine", "Sonstiges"] as const;
+type ViewMode = "cards" | "table";
 
 export default function ProdukteKatalogPage() {
     const [selectedKat, setSelectedKat] = useState<(typeof KATS)[number]>("Obst");
+    const [view, setView] = useState<ViewMode>("cards");
+
     const [search, setSearch] = useState("");
     const debouncedSearch = useDebounce(search, 300);
 
@@ -47,22 +53,29 @@ export default function ProdukteKatalogPage() {
         (async () => {
             setLoading(true);
             try {
-                // Build product query
-                const q: string[] = [
-                    Query.equal("hauptkategorie", selectedKat),
-                    Query.orderAsc("name"),
-                    Query.limit(200),
-                ];
+                const base = [Query.equal("hauptkategorie", selectedKat), Query.limit(200)];
+                let list: Produkt[] = [];
+
                 if (debouncedSearch.trim().length > 0) {
-                    // requires Full-Text index on 'name'
-                    q.push(Query.search("name", debouncedSearch.trim()));
+                    // OR-Suche über name ODER sorte -> zwei Requests, clientseitig mergen
+                    const [byName] = await Promise.all([
+                        databases.listDocuments(DB, PRODUKTE, [
+                            ...base, Query.search("name", debouncedSearch.trim()),
+                        ]),
+                    ]);
+                    list = dedupeById([...byName.documents,]).map(mapProdukt);
+                    // optional sort by name
+                    list.sort((a, b) => a.name.localeCompare(b.name, "de"));
+                } else {
+                    const prodRes = await databases.listDocuments(DB, PRODUKTE, [
+                        ...base, Query.orderAsc("name"),
+                    ]);
+                    list = prodRes.documents.map(mapProdukt);
                 }
 
-                const prodRes = await databases.listDocuments(DB, PRODUKTE, q);
-                const list: Produkt[] = prodRes.documents.map(mapProdukt);
                 setProdukte(list);
 
-                // Angebote-Counts for visible products
+                // Angebote-Counts für sichtbare Produkte
                 if (list.length) {
                     const ids = list.map((p) => p.$id);
                     const anRes = await databases.listDocuments(DB, ANGEBOTE, [
@@ -85,103 +98,225 @@ export default function ProdukteKatalogPage() {
 
     return (
         <main className="min-h-screen container mx-auto p-4 space-y-4">
-            <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                <div>
+            {/* Top bar: title + search + view switch */}
+            {/* --- Top controls (2-row responsive grid) --- */}
+            <section className="grid grid-cols-12 gap-4">
+                {/* Row 1: Title + count */}
+                <div className="col-span-12 lg:col-span-8">
                     <h1 className="text-3xl font-bold">Katalog</h1>
                     <p className="text-sm text-muted-foreground">
                         {loading ? "Laden…" : `${produkte.length} Produkte`}
                     </p>
                 </div>
 
-                {/* Search bar */}
-                <div className="relative w-full md:w-80">
-                    <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    <Input
-                        className="pl-8"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Im Katalog suchen (Name)…"
-                        aria-label="Produkte suchen"
-                    />
-                </div>
-            </header>
-
-            {/* Styled Tabs */}
-            <Tabs value={selectedKat} onValueChange={(v) => setSelectedKat(v as any)}>
-                <TabsList
-                    className="
-            flex flex-wrap gap-1 rounded-xl
-            bg-emerald-50/60 border border-emerald-100 p-1
-          "
-                >
-                    {KATS.map((k) => (
-                        <TabsTrigger
-                            key={k}
-                            value={k}
+                {/* Row 1: View switch (right) */}
+                {/* <div className="col-span-12 lg:col-span-4 flex lg:justify-end">
+                    <Tabs value={view} onValueChange={(v) => setView(v as ViewMode)}>
+                        <TabsList
                             className="
-                rounded-lg px-3 py-1.5 text-sm
-                data-[state=active]:bg-emerald-200/60
-                data-[state=active]:text-emerald-900
-                data-[state=active]:shadow-sm
-                hover:bg-emerald-100/40 transition
-              "
+          flex gap-1 rounded-xl
+          bg-emerald-50/60 border border-emerald-100 p-1
+        "
                         >
-                            {k}
-                        </TabsTrigger>
-                    ))}
-                </TabsList>
-            </Tabs>
+                            <TabsTrigger
+                                value="cards"
+                                className="
+            rounded-lg px-3 py-1.5 text-sm
+            data-[state=active]:bg-emerald-200/60
+            data-[state=active]:text-emerald-900
+            data-[state=active]:shadow-sm
+            hover:bg-emerald-100/40 transition
+          "
+                            >
+                                Karten
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="table"
+                                className="
+            rounded-lg px-3 py-1.5 text-sm
+            data-[state=active]:bg-emerald-200/60
+            data-[state=active]:text-emerald-900
+            data-[state=active]:shadow-sm
+            hover:bg-emerald-100/40 transition
+          "
+                            >
+                                Tabelle
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                </div> */}
 
-            {/* Grid */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {produkte.map((p) => {
-                    const count = angeboteCount[p.$id] ?? 0;
-                    const hasAngebote = count > 0;
-                    return (
-                        <article key={p.$id} className="rounded-xl border bg-white p-4 shadow-sm">
-                            <div className="flex items-start justify-between gap-2">
-                                <button
-                                    type="button"
-                                    className="text-left font-semibold hover:underline"
-                                    onClick={() => { }}
-                                    title="Produktseite (bald)"
+                {/* Row 2: Category tabs (left) */}
+                <div className="col-span-12 lg:col-span-8">
+                    <Tabs value={selectedKat} onValueChange={(v) => setSelectedKat(v as any)}>
+                        <TabsList
+                            className="
+          flex flex-wrap gap-1 rounded-xl
+          bg-emerald-50/60 border border-emerald-100 p-1
+        "
+                        >
+                            {KATS.map((k) => (
+                                <TabsTrigger
+                                    key={k}
+                                    value={k}
+                                    className="
+              rounded-lg px-3 py-1.5 text-sm
+              data-[state=active]:bg-emerald-200/60
+              data-[state=active]:text-emerald-900
+              data-[state=active]:shadow-sm
+              hover:bg-emerald-100/40 transition
+            "
                                 >
-                                    {p.name}{p.sorte ? ` – ${p.sorte}` : ""}
-                                </button>
-                                <span
-                                    className={[
-                                        "text-xs px-2 py-1 rounded-full",
-                                        hasAngebote ? "bg-green-100 text-green-900" : "bg-gray-200 text-gray-600",
-                                    ].join(" ")}
-                                    title={hasAngebote ? `${count} Angebot(e)` : "Keine Angebote vorhanden"}
-                                >
-                                    {hasAngebote ? `${count} Angebote` : "Keine Angebote"}
-                                </span>
-                            </div>
+                                    {k}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </Tabs>
+                </div>
 
-                            <div className="mt-1 text-sm text-muted-foreground">
-                                {p.unterkategorie ?? "–"}
-                            </div>
-
-                            <Saisonalitaet months={p.saisonalitaet ?? []} />
-                        </article>
-                    );
-                })}
+                {/* Row 2: Search (right) */}
+                <div className="col-span-12 lg:col-span-4">
+                    <div className="relative w-full">
+                        <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                        <Input
+                            className="pl-8 w-full"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Suche (Name oder Sorte)…"
+                            aria-label="Produkte suchen"
+                        />
+                    </div>
+                </div>
             </section>
 
-            {!loading && produkte.length === 0 && (
-                <div className="text-sm text-muted-foreground">Keine Produkte gefunden.</div>
+            {/* Content */}
+            {view === "cards" ? (
+                <CardsView produkte={produkte} angeboteCount={angeboteCount} />
+            ) : (
+                <TableView produkte={produkte} angeboteCount={angeboteCount} />
             )}
+
+            <div className="flex justify-between items-center">
+                <Link href="/staffeln" className="text-blue-600 hover:underline">
+                    Zu den Angeboten
+                </Link>
+                {!loading && produkte.length === 0 && (
+                    <div className="text-sm text-muted-foreground">Keine Produkte gefunden.</div>
+                )}
+            </div>
         </main>
     );
 }
+
+/* ---------- Views ---------- */
+
+function CardsView({
+    produkte, angeboteCount,
+}: { produkte: Produkt[]; angeboteCount: Record<string, number> }) {
+    return (
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {produkte.map((p) => {
+                const count = angeboteCount[p.$id] ?? 0;
+                const hasAngebote = count > 0;
+                return (
+                    <article key={p.$id} className="rounded-xl border bg-white p-4 shadow-sm">
+                        <div className="flex items-start justify-between gap-2">
+                            <button
+                                type="button"
+                                className="text-left font-semibold hover:underline"
+                                onClick={() => { }}
+                                title="Produktseite (bald)"
+                            >
+                                {p.name}{p.sorte ? ` – ${p.sorte}` : ""}
+                            </button>
+                            <span
+                                className={[
+                                    "text-xs px-2 py-1 rounded-full",
+                                    hasAngebote ? "bg-green-100 text-green-900" : "bg-gray-200 text-gray-600",
+                                ].join(" ")}
+                                title={hasAngebote ? `${count} Angebot(e)` : "Keine Angebote vorhanden"}
+                            >
+                                {hasAngebote ? `${count} Angebote` : "Keine Angebote"}
+                            </span>
+                        </div>
+
+                        <div className="mt-1 text-sm text-muted-foreground">
+                            {p.unterkategorie ?? "–"}
+                        </div>
+
+                        <Saisonalitaet months={p.saisonalitaet ?? []} />
+                    </article>
+                );
+            })}
+        </section>
+    );
+}
+
+function TableView({
+    produkte, angeboteCount,
+}: { produkte: Produkt[]; angeboteCount: Record<string, number> }) {
+    return (
+        <div className="rounded-xl border bg-white shadow-sm overflow-x-auto">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Kategorie</TableHead>
+                        <TableHead>Unterkategorie</TableHead>
+                        <TableHead>Angebote</TableHead>
+                        <TableHead className="w-[360px]">Saisonalität</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {produkte.map((p) => {
+                        const count = angeboteCount[p.$id] ?? 0;
+                        const hasAngebote = count > 0;
+                        return (
+                            <TableRow key={p.$id}>
+                                <TableCell className="font-medium">
+                                    <button
+                                        type="button"
+                                        className="hover:underline"
+                                        onClick={() => { }}
+                                        title="Produktseite (bald)"
+                                    >
+                                        {p.name}{p.sorte ? ` – ${p.sorte}` : ""}
+                                    </button>
+                                </TableCell>
+                                <TableCell>{p.hauptkategorie}</TableCell>
+                                <TableCell className="text-muted-foreground">
+                                    {p.unterkategorie ?? "–"}
+                                </TableCell>
+                                <TableCell>
+                                    <span
+                                        className={[
+                                            "text-xs px-2 py-1 rounded-full",
+                                            hasAngebote ? "bg-green-100 text-green-900" : "bg-gray-200 text-gray-600",
+                                        ].join(" ")}
+                                    >
+                                        {hasAngebote ? `${count} Angebote` : "Keine"}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <Saisonalitaet months={p.saisonalitaet ?? []} />
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
+        </div>
+    );
+}
+
+/* ---------- Helpers ---------- */
 
 function mapProdukt(doc: any): Produkt {
     const raw = Array.isArray(doc.saisonalitaet) ? doc.saisonalitaet : [];
     const saisonalitaet: number[] = [
         ...new Set<number>(
             raw.map((m: any) => (typeof m === "string" ? parseInt(m, 10) : m))
-        ),
+        )
     ]
         .filter((n: any) => Number.isFinite(n) && n >= 1 && n <= 12)
         .sort((a, b) => a - b);
@@ -202,6 +337,15 @@ function mapProdukt(doc: any): Produkt {
     };
 }
 
+function dedupeById(docs: any[]) {
+    const seen = new Set<string>();
+    const out: any[] = [];
+    for (const d of docs) {
+        if (!seen.has(d.$id)) { seen.add(d.$id); out.push(d); }
+    }
+    return out;
+}
+
 /** Debounce helper */
 function useDebounce<T>(value: T, delay = 300) {
     const [v, setV] = useState(value);
@@ -212,7 +356,7 @@ function useDebounce<T>(value: T, delay = 300) {
     return v;
 }
 
-/** Season bands (unchanged) */
+/** Season bands (supports gaps + wrap-around) */
 function Saisonalitaet({ months }: { months: number[] }) {
     const segments = useMemo(() => computeSegments(months), [months]);
     const monthWidth = 100 / 12;
@@ -222,6 +366,7 @@ function Saisonalitaet({ months }: { months: number[] }) {
             <div className="text-xs text-muted-foreground mb-1">Saisonalität</div>
 
             <div className="relative">
+                {/* baseline cells */}
                 <div className="grid grid-cols-12 gap-px h-8">
                     {Array.from({ length: 12 }, (_, i) => (
                         <div key={i} className="bg-muted/60 rounded-[2px] flex items-center justify-center">
@@ -232,6 +377,7 @@ function Saisonalitaet({ months }: { months: number[] }) {
                     ))}
                 </div>
 
+                {/* active bands */}
                 {segments.map((seg, idx) => (
                     <div
                         key={idx}
