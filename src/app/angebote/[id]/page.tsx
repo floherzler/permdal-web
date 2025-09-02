@@ -6,8 +6,8 @@ import { notFound } from "next/navigation";
 import AngebotLive from "@/components/AngebotLive";
 import CopyMailButton from "@/components/CopyMailButton";
 
-export default async function AngebotPage({ params }: { params: { id: string } }) {
-    const { id } = await Promise.resolve(params);
+export default async function AngebotPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const angebot = await databases.getDocument(
         env.appwrite.db,
         env.appwrite.angebote_collection_id,
