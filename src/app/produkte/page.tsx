@@ -12,6 +12,7 @@ import { Search as SearchIcon } from "lucide-react";
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Produkt = {
     $id: string;
@@ -223,6 +224,74 @@ export default function ProdukteKatalogPage() {
     );
 }
 
+function AngeboteModal({ produktId, produktName, produktSorte }: { produktId: string; produktName: string; produktSorte?: string }) {
+    const [open, setOpen] = useState(false);
+    const [angebote, setAngebote] = useState<Angebot[]>([]);
+
+    async function load() {
+        // call Appwrite to get all offers for this produktId
+        const res = await databases.listDocuments(DB, ANGEBOTE, [
+            Query.equal("produktID", produktId),
+        ]);
+        setAngebote(res.documents as Angebot[]);
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <button
+                onClick={() => { setOpen(true); load(); }}
+                className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-900"
+            >
+                Angebote anzeigen
+            </button>
+            <DialogContent className="bg-white rounded-lg p-6 shadow-lg">
+                <DialogHeader>
+                    <DialogTitle>
+                        Angebote für {produktName}{produktSorte ? ` – ${produktSorte}` : ""}
+                    </DialogTitle>
+                </DialogHeader>
+                {angebote.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Keine Angebote vorhanden</p>
+                ) : (
+                    <ul className="space-y-3">{<ul className="space-y-3">
+                        {angebote.map((a) => (
+                            <li key={a.$id} className="border rounded-md p-3">
+                                <div className="flex justify-between">
+                                    <div>
+                                        <p className="font-semibold">
+                                            {a.mengeVerfuegbar} {a.einheit} verfügbar
+                                        </p>
+                                        <p className="text-sm mt-1">
+                                            Preis: {a.euroPreis.toFixed(2)} € / {a.einheit}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Saatdatum: {new Date(a.saatPflanzDatum).toLocaleDateString("de-DE")}
+                                        </p>
+                                        {a.ernteProjektion?.length > 0 && (
+                                            <p className="text-xs text-muted-foreground">
+                                                Nächste Ernte:{" "}
+                                                {new Date(a.ernteProjektion[0]).toLocaleDateString("de-DE")}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <Link
+                                        href={`/angebote/${a.$id}`}
+                                        className="text-blue-600 hover:underline"
+                                    >
+                                        Details
+                                    </Link>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    }</ul>
+                )}
+            </DialogContent>
+
+        </Dialog>
+    );
+}
+
 /* ---------- Views ---------- */
 
 function CardsView({
@@ -258,6 +327,11 @@ function CardsView({
                         <div className="mt-1 text-sm text-muted-foreground">
                             {p.unterkategorie ?? "–"}
                         </div>
+                        <AngeboteModal
+                            produktId={p.$id}
+                            produktName={p.name}
+                            produktSorte={p.sorte}
+                        />
 
                         <Saisonalitaet months={p.saisonalitaet ?? []} />
                     </article>
