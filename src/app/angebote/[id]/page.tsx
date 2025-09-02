@@ -27,6 +27,7 @@ export default async function AngebotPage({ params }: { params: { id: string } }
                         ...angebot,
                         mengeVerfuegbar: angebot.mengeVerfuegbar,
                         einheit: angebot.einheit,
+                        menge: angebot.menge,
                         euroPreis: angebot.euroPreis,
                     }}
                 />
@@ -40,7 +41,7 @@ export default async function AngebotPage({ params }: { params: { id: string } }
                         <span className="font-semibold">Ernteprojektion:</span>{" "}
                         {angebot.ernteProjektion
                             .map((d: string) => new Date(d).toLocaleDateString("de-DE"))
-                            .join(", ")}
+                            .join(" - ")}
                     </p>
                 )}
             </div>
@@ -51,7 +52,7 @@ export default async function AngebotPage({ params }: { params: { id: string } }
                     href={`mailto:${mailAddress}?subject=Anfrage%20zu%20Angebot%20${params.id}`}
                     className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 inline-block"
                 >
-                    Kontakt aufnehmen
+                    Per E-Mail Kontakt aufnehmen
                 </a>
 
                 {/* Copy section */}

@@ -1,0 +1,136 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Query } from "appwrite";
+import { databases } from "@/models/client/config";
+import env from "@/app/env";
+
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+type Angebot = {
+    $id: string;
+    mengeVerfuegbar: number;
+    einheit: string;
+    euroPreis: number;
+    menge: number;
+    saatPflanzDatum: string;
+    ernteProjektion?: string[];
+};
+
+const DB = env.appwrite.db;
+const ANGEBOTE = env.appwrite.angebote_collection_id;
+
+export default function AngeboteModal({
+    produktId,
+    produktName,
+    produktSorte,
+    produktAngebote,
+}: {
+    produktId: string;
+    produktName: string;
+    produktSorte?: string;
+    produktAngebote: number;
+}) {
+    const [angebote, setAngebote] = useState<Angebot[]>([]);
+
+    async function load() {
+        const res = await databases.listDocuments(DB, ANGEBOTE, [
+            Query.equal("produktID", produktId),
+        ]);
+        setAngebote(res.documents as unknown as Angebot[]);
+    }
+
+    if (produktAngebote === 0) {
+        // gray "no offers" button
+        return (
+            <Button
+                variant="outline"
+                size="sm"
+                className="text-gray-500 border-gray-300 cursor-default"
+                disabled
+            >
+                Keine Angebote
+            </Button>
+        );
+    }
+
+    return (
+        <Dialog onOpenChange={(open) => open && load()}>
+            <DialogTrigger asChild>
+                <Button
+                    size="sm"
+                    className="bg-emerald-600 text-white hover:bg-emerald-700"
+                >
+                    {produktAngebote} {produktAngebote > 1 ? "Angebote" : "Angebot"} anzeigen
+                </Button>
+            </DialogTrigger>
+
+            <DialogContent className="bg-white rounded-2xl p-6 shadow-xl max-w-lg">
+                <DialogHeader>
+                    <DialogTitle className="text-xl font-semibold text-emerald-900">
+                        Angebote für {produktName}
+                        {produktSorte ? ` – ${produktSorte}` : ""}
+                    </DialogTitle>
+                </DialogHeader>
+
+                {angebote.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-6">
+                        Keine Angebote vorhanden
+                    </p>
+                ) : (
+                    <ul className="space-y-4 text-black">
+                        {angebote.map((a) => (
+                            <li key={a.$id}>
+                                <div className="rounded-xl border bg-white p-4 shadow-sm flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <p className="font-semibold text-black">
+                                            {a.mengeVerfuegbar} {a.einheit} verfügbar
+                                        </p>
+                                        <p className="text-sm">
+                                            Preis: {a.euroPreis.toFixed(2)} € / {a.menge} {a.einheit}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Saat- / Pflanzdatum:{" "}
+                                            {new Date(a.saatPflanzDatum).toLocaleDateString("de-DE")}
+                                        </p>
+                                        {(a.ernteProjektion?.length ?? 0) > 0 && (
+                                            <p className="text-xs text-muted-foreground">
+                                                Nächste Ernte:{" "}
+                                                {new Date(a.ernteProjektion![0]).toLocaleDateString("de-DE")}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <Link href={`/angebote/${a.$id}`} passHref>
+                                        <Button variant="link" className="px-0 flex items-center gap-1">
+                                            Details und Bestellung
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="18"
+                                                height="18"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                className="ml-1"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </DialogContent>
+        </Dialog>
+
+    );
+}

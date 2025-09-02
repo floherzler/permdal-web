@@ -8,6 +8,7 @@ type Angebot = {
     $id: string;
     mengeVerfuegbar: number;
     einheit: string;
+    menge: number;
     euroPreis: number;
 };
 
@@ -39,7 +40,15 @@ export default function AngebotLive({ initial }: { initial: Angebot }) {
             </p>
             <p>
                 <span className="font-semibold">Preis:</span>{" "}
-                {angebot.euroPreis.toFixed(2)} € / {angebot.einheit}
+                {(() => {
+                    let menge = angebot.menge;
+                    let einheit = angebot.einheit;
+                    if (menge >= 1000 && einheit.toLowerCase() === "gramm") {
+                        menge = menge / 1000;
+                        einheit = "kg";
+                    }
+                    return `${angebot.euroPreis.toFixed(2)} € / ${menge} ${einheit}`;
+                })()}
             </p>
         </div>
     );
