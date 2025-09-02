@@ -7,10 +7,11 @@ import AngebotLive from "@/components/AngebotLive";
 import CopyMailButton from "@/components/CopyMailButton";
 
 export default async function AngebotPage({ params }: { params: { id: string } }) {
+    const { id } = await Promise.resolve(params);
     const angebot = await databases.getDocument(
         env.appwrite.db,
         env.appwrite.angebote_collection_id,
-        params.id
+        id
     );
 
     // Define mailAddress, e.g. from angebot or use a default
@@ -18,7 +19,7 @@ export default async function AngebotPage({ params }: { params: { id: string } }
 
     return (
         <main className="container mx-auto p-6 max-w-2xl">
-            <h1 className="text-2xl font-bold mb-4">Angebot {angebot.$id}</h1>
+            <h1 className="text-2xl font-bold mb-4">Angebot {id}</h1>
 
             <div className="rounded-lg border bg-white p-6 shadow-sm space-y-3">
                 {/* 👇 hydration: static props + realtime updates */}
@@ -49,7 +50,7 @@ export default async function AngebotPage({ params }: { params: { id: string } }
             <div className="mt-6 flex flex-col gap-3">
                 {/* Kontakt aufnehmen (mailto still there for those who can use it) */}
                 <a
-                    href={`mailto:${mailAddress}?subject=Anfrage%20zu%20Angebot%20${params.id}`}
+                    href={`mailto:${mailAddress}?subject=Anfrage%20zu%20Angebot%20${id}`}
                     className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 inline-block"
                 >
                     Per E-Mail Kontakt aufnehmen
@@ -58,7 +59,7 @@ export default async function AngebotPage({ params }: { params: { id: string } }
                 {/* Copy section */}
                 <div className="flex flex-wrap items-center gap-3">
                     <CopyMailButton mailAddress={mailAddress} />
-                    <CopyMailButton mailAddress={`Anfrage zu Angebot ${params.id}`} />
+                    <CopyMailButton mailAddress={`Anfrage zu Angebot ${id}`} />
                 </div>
             </div>
 
