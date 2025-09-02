@@ -29,13 +29,13 @@ export default function Navbar() {
               </div>
             </NavigationMenuItem>
 
-            {/* Produkte */}
+            {/* Marktplatz */}
             <NavigationMenuItem>
               <NavigationMenuLink
-                href="/produkte"
+                href="/marktplatz"
                 className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
               >
-                Produkte
+                Marktplatz
               </NavigationMenuLink>
             </NavigationMenuItem>
 
@@ -50,7 +50,7 @@ export default function Navbar() {
             </NavigationMenuItem>
 
             {/* "Bestellungen" if user has "admin" label else "Upgrade" */}
-            {user && (
+            {/* {user && (
               <NavigationMenuItem>
                 {user.labels?.includes("admin") ? (
                   <NavigationMenuLink
@@ -68,7 +68,7 @@ export default function Navbar() {
                   </NavigationMenuLink>
                 )}
               </NavigationMenuItem>
-            )}
+            )} */}
 
             {/* Anmelden */}
             {user ? (

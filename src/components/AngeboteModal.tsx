@@ -95,16 +95,30 @@ export default function AngeboteModal({
                                             {a.mengeVerfuegbar} {a.einheit} verfügbar
                                         </p>
                                         <p className="text-sm">
-                                            Preis: {a.euroPreis.toFixed(2)} € / {a.menge} {a.einheit}
+                                            Preis: {(() => {
+                                                let menge = a.menge;
+                                                let einheit = a.einheit;
+                                                if (einheit.toLowerCase() === "gramm" && menge >= 1000) {
+                                                    menge = menge / 1000;
+                                                    einheit = "kg";
+                                                }
+                                                if (menge === 1 && einheit.toLowerCase() === "stück") {
+                                                    return `${a.euroPreis.toFixed(2)} € / Stück`;
+                                                }
+                                                return `${a.euroPreis.toFixed(2)} € / ${menge} ${einheit}`;
+                                            })()}
                                         </p>
                                         <p className="text-xs text-muted-foreground">
                                             Saat- / Pflanzdatum:{" "}
                                             {new Date(a.saatPflanzDatum).toLocaleDateString("de-DE")}
                                         </p>
-                                        {(a.ernteProjektion?.length ?? 0) > 0 && (
+                                        {a.ernteProjektion && a.ernteProjektion.length > 0 && (
                                             <p className="text-xs text-muted-foreground">
                                                 Nächste Ernte:{" "}
-                                                {new Date(a.ernteProjektion![0]).toLocaleDateString("de-DE")}
+                                                {a.ernteProjektion.length === 1 
+                                                    ? new Date(a.ernteProjektion[0]).toLocaleDateString("de-DE")
+                                                    : `${new Date(a.ernteProjektion[0]).toLocaleDateString("de-DE")} - ${new Date(a.ernteProjektion[a.ernteProjektion.length - 1]).toLocaleDateString("de-DE")}`
+                                                }
                                             </p>
                                         )}
                                     </div>
