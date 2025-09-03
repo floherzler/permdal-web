@@ -179,7 +179,7 @@ function ProduktForm({ produkt, onSubmit }: { produkt?: Produkt, onSubmit: (valu
                 <FormField control={form.control} name="bodenansprueche" render={({ field }) => <ArrayInput field={field} label="Bodenansprüche" />} />
                 <FormField control={form.control} name="begleitpflanzen" render={({ field }) => <ArrayInput field={field} label="Begleitpflanzen" />} /> */}
                 <DialogClose asChild>
-                    <Button type="submit" className="bg-green-800 text-white">Abschicken</Button>
+                    <Button type="submit" className="bg-permdal-800 text-white">Abschicken</Button>
                 </DialogClose>
             </form>
         </Form>
@@ -263,7 +263,7 @@ export default function ZentraleAdmin({ initialStaffeln, initialProdukte }: { in
                 <h2 className="text-2xl font-bold text-center mb-4">Produkte</h2>
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button className="bg-green-800 text-white hover:bg-green-700">
+                        <Button className="bg-permdal-800 text-white hover:bg-permdal-700">
                             Produkt zum Katalog hinzufügen
                         </Button>
                     </DialogTrigger>

@@ -12,6 +12,13 @@ import { Search as SearchIcon } from "lucide-react";
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
+
+import AngeboteModal from "@/components/AngeboteModal";
+import { Button } from "@/components/ui/button";
+
+import { storage } from "@/models/client/config";
 
 type Produkt = {
     $id: string;
@@ -26,6 +33,7 @@ type Produkt = {
     bodenansprueche?: string[];
     begleitpflanzen?: string[];
     saisonalitaet?: number[]; // 1..12
+    imageID?: string;
 };
 
 type Angebot = Models.Document & { produktID: string };
@@ -33,6 +41,7 @@ type Angebot = Models.Document & { produktID: string };
 const DB = env.appwrite.db;
 const PRODUKTE = env.appwrite.produce_collection_id;
 const ANGEBOTE = env.appwrite.angebote_collection_id;
+const STORAGE_BUCKET = env.appwrite.storage;
 
 // Exact values from your DB:
 const KATS = ["Obst", "Gemüse", "Kräuter", "Maschine", "Sonstiges"] as const;
@@ -115,7 +124,7 @@ export default function ProdukteKatalogPage() {
                         <TabsList
                             className="
           flex flex-wrap gap-1 rounded-xl
-          bg-emerald-50/60 border border-emerald-100 p-1
+          bg-permdal-50/60 border border-permdal-100 p-1
         "
                         >
                             {KATS.map((k) => (
@@ -124,10 +133,10 @@ export default function ProdukteKatalogPage() {
                                     value={k}
                                     className="
               rounded-lg px-3 py-1.5 text-sm
-              data-[state=active]:bg-emerald-200/60
-              data-[state=active]:text-emerald-900
+              data-[state=active]:bg-permdal-200/60
+              data-[state=active]:text-permdal-900
               data-[state=active]:shadow-sm
-              hover:bg-emerald-100/40 transition
+              hover:bg-permdal-100/40 transition
             "
                                 >
                                     {k}
@@ -166,17 +175,17 @@ export default function ProdukteKatalogPage() {
                                 <TabsList
                                     className="
               flex gap-1 rounded-lg
-              bg-emerald-50/60 border border-emerald-100 p-1
+              bg-permdal-50/60 border border-permdal-100 p-1
             "
                                 >
                                     <TabsTrigger
                                         value="cards"
                                         className="
                 rounded-md px-3 py-1.5 text-sm shrink-0
-                data-[state=active]:bg-emerald-200/60
-                data-[state=active]:text-emerald-900
+                data-[state=active]:bg-permdal-200/60
+                data-[state=active]:text-permdal-900
                 data-[state=active]:shadow-sm
-                hover:bg-emerald-100/40 transition
+                hover:bg-permdal-100/40 transition
               "
                                     >
                                         Karten
@@ -184,12 +193,12 @@ export default function ProdukteKatalogPage() {
                                     <TabsTrigger
                                         value="table"
                                         className="
-                rounded-md px-3 py-1.5 text-sm shrink-0
-                data-[state=active]:bg-emerald-200/60
-                data-[state=active]:text-emerald-900
-                data-[state=active]:shadow-sm
-                hover:bg-emerald-100/40 transition
-              "
+                                rounded-md px-3 py-1.5 text-sm shrink-0
+                                data-[state=active]:bg-permdal-200/60
+                                data-[state=active]:text-permdal-900
+                                data-[state=active]:shadow-sm
+                                hover:bg-permdal-100/40 transition
+                            "
                                     >
                                         Tabelle
                                     </TabsTrigger>
@@ -211,14 +220,6 @@ export default function ProdukteKatalogPage() {
                 )
             }
 
-            <div className="flex justify-between items-center">
-                <Link href="/staffeln" className="text-blue-600 hover:underline">
-                    Zu den Angeboten
-                </Link>
-                {!loading && produkte.length === 0 && (
-                    <div className="text-sm text-muted-foreground">Keine Produkte gefunden.</div>
-                )}
-            </div>
         </main >
     );
 }
@@ -228,39 +229,63 @@ export default function ProdukteKatalogPage() {
 function CardsView({
     produkte, angeboteCount,
 }: { produkte: Produkt[]; angeboteCount: Record<string, number> }) {
+    produkte.forEach((p) => {
+        console.log("Produkt", p.name, "imageId:", p.imageID);
+    });
+
     return (
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {produkte.map((p) => {
                 const count = angeboteCount[p.$id] ?? 0;
                 const hasAngebote = count > 0;
                 return (
-                    <article key={p.$id} className="rounded-xl border bg-white p-4 shadow-sm">
-                        <div className="flex items-start justify-between gap-2">
-                            <button
-                                type="button"
-                                className="text-left font-semibold hover:underline"
-                                onClick={() => { }}
-                                title="Produktseite (bald)"
-                            >
-                                {p.name}{p.sorte ? ` – ${p.sorte}` : ""}
-                            </button>
-                            <span
-                                className={[
-                                    "text-xs px-2 py-1 rounded-full",
-                                    hasAngebote ? "bg-green-100 text-green-900" : "bg-gray-200 text-gray-600",
-                                ].join(" ")}
-                                title={hasAngebote ? `${count} Angebot(e)` : "Keine Angebote vorhanden"}
-                            >
-                                {hasAngebote ? `${count} Angebote` : "Keine Angebote"}
-                            </span>
+                    <article
+                        key={p.$id}
+                        className="rounded-xl border bg-white p-4 shadow-sm flex flex-col gap-2"
+                    >
+                        {/* Header with Avatar + Name + Angebote */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-12 w-12 rounded-md">
+                                    {p.imageID ? (
+                                        <AvatarImage
+                                            src={storage.getFilePreview(STORAGE_BUCKET, p.imageID, 160, 160)}
+                                            alt={p.name}
+                                        />
+                                    ) : (
+                                        <AvatarFallback className="bg-permdal-100 text-permdal-800">
+                                            {'FB'}
+                                        </AvatarFallback>
+                                    )}
+                                </Avatar>
+
+                                <Button
+                                    variant="ghost"
+                                    className="text-left font-semibold hover:underline px-0"
+                                    onClick={() => { }}
+                                    title="Produktseite (bald)"
+                                >
+                                    {p.name}{p.sorte ? ` – ${p.sorte}` : ""}
+                                </Button>
+                            </div>
+
+                            <AngeboteModal
+                                produktId={p.$id}
+                                produktName={p.name}
+                                produktSorte={p.sorte}
+                                produktAngebote={angeboteCount[p.$id] ?? 0}
+                            />
                         </div>
 
-                        <div className="mt-1 text-sm text-muted-foreground">
+                        {/* Unterkategorie */}
+                        <div className="text-sm text-muted-foreground">
                             {p.unterkategorie ?? "–"}
                         </div>
 
+                        {/* Saisonbalken */}
                         <Saisonalitaet months={p.saisonalitaet ?? []} />
                     </article>
+
                 );
             })}
         </section>
@@ -306,7 +331,7 @@ function TableView({
                                     <span
                                         className={[
                                             "text-xs px-2 py-1 rounded-full",
-                                            hasAngebote ? "bg-green-100 text-green-900" : "bg-gray-200 text-gray-600",
+                                            hasAngebote ? "bg-permdal-100 text-permdal-900" : "bg-permdal-200 text-permdal-600",
                                         ].join(" ")}
                                     >
                                         {hasAngebote ? `${count} Angebote` : "Keine"}
@@ -349,6 +374,7 @@ function mapProdukt(doc: any): Produkt {
         bodenansprueche: doc.bodenansprueche,
         begleitpflanzen: doc.begleitpflanzen,
         saisonalitaet,
+        imageID: doc.imageID, // Add this line
     };
 }
 
@@ -398,8 +424,8 @@ function Saisonalitaet({ months }: { months: number[] }) {
                         key={idx}
                         className="
               absolute top-1/2 -translate-y-1/2 h-3
-              bg-emerald-500/60 rounded-full
-              ring-1 ring-emerald-600/20
+              bg-green-500/60 rounded-full
+              ring-1 ring-green-600/20
             "
                         style={{
                             left: `${(seg.start - 1) * monthWidth}%`,
