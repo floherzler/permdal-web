@@ -197,8 +197,8 @@ export default function MarktplatzPage() {
     };
 
     const formatPricePerUnit = (euroPreis: number, menge: number, einheit: string) => {
-        let displayMenge = menge;
-        let displayEinheit = einheit;
+        const displayMenge = menge;
+        const displayEinheit = einheit;
 
         // Convert grams to kg if >= 1000
         if (einheit.toLowerCase() === "gramm" && menge >= 1000) {
