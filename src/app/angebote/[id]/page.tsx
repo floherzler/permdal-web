@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 // app/angebote/[id]/page.tsx
 import AngebotLive from "@/components/AngebotLive";
-import CopyMailButton from "@/components/CopyMailButton";
+import OrderDialog from "@/components/OrderDialog";
 
 export default async function AngebotPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -14,8 +14,7 @@ export default async function AngebotPage({ params }: { params: Promise<{ id: st
         id
     );
 
-    // Define mailAddress, e.g. from angebot or use a default
-    const mailAddress = "team@agroforst-ff.de";
+    // Kontakt via Formular (Popup)
 
     return (
         <main className="container mx-auto p-6 max-w-2xl">
@@ -47,20 +46,8 @@ export default async function AngebotPage({ params }: { params: Promise<{ id: st
                 )}
             </div>
 
-            <div className="mt-6 flex flex-col gap-3">
-                {/* Kontakt aufnehmen (mailto still there for those who can use it) */}
-                <a
-                    href={`mailto:${mailAddress}?subject=Anfrage%20zu%20Angebot%20${id}`}
-                    className="bg-permdal-600 text-white px-4 py-2 rounded-lg hover:bg-permdal-700 inline-block"
-                >
-                    Per E-Mail Kontakt aufnehmen
-                </a>
-
-                {/* Copy section */}
-                <div className="flex flex-wrap items-center gap-3">
-                    <CopyMailButton mailAddress={mailAddress} />
-                    <CopyMailButton mailAddress={`Anfrage zu Angebot ${id}`} />
-                </div>
+            <div className="mt-6">
+                <OrderDialog angebotId={id} />
             </div>
 
 
