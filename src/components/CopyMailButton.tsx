@@ -31,7 +31,7 @@ export default function CopyMailButton({ mailAddress }: CopyMailButtonProps) {
         >
             {copied ? (
                 <>
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-4 w-4 text-permdal-600" />
                     <span>Kopiert!</span>
                 </>
             ) : (

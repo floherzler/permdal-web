@@ -29,12 +29,12 @@ export default function AboutSection() {
         {/* Buttons */}
         <div className="flex justify-center md:justify-start mt-4 space-x-4">
           <Link href="/permdal">
-            <button className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold shadow-md border-2 border-brown-600 hover:bg-brown-400 transition-all">
+            <button className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold shadow-md border-2 border-permdal-200 hover:bg-permdal-50 transition-all">
               Über Permdal
             </button>
           </Link>
           <Link href="/team">
-            <button className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold shadow-md border-2 border-brown-600 hover:bg-brown-400 transition-all">
+            <button className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold shadow-md border-2 border-permdal-200 hover:bg-permdal-50 transition-all">
               Über das Team
             </button>
           </Link>

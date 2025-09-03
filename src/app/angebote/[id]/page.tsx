@@ -51,7 +51,7 @@ export default async function AngebotPage({ params }: { params: Promise<{ id: st
                 {/* Kontakt aufnehmen (mailto still there for those who can use it) */}
                 <a
                     href={`mailto:${mailAddress}?subject=Anfrage%20zu%20Angebot%20${id}`}
-                    className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 inline-block"
+                    className="bg-permdal-600 text-white px-4 py-2 rounded-lg hover:bg-permdal-700 inline-block"
                 >
                     Per E-Mail Kontakt aufnehmen
                 </a>

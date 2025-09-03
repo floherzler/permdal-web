@@ -67,7 +67,7 @@ export default function AngeboteModal({
             <DialogTrigger asChild>
                 <Button
                     size="sm"
-                    className="bg-emerald-600 text-white hover:bg-emerald-700"
+                    className="bg-permdal-600 text-white hover:bg-permdal-700"
                 >
                     {produktAngebote} {produktAngebote > 1 ? "Angebote" : "Angebot"} anzeigen
                 </Button>
@@ -75,7 +75,7 @@ export default function AngeboteModal({
 
             <DialogContent className="bg-white rounded-2xl p-6 shadow-xl max-w-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold text-emerald-900">
+                    <DialogTitle className="text-xl font-semibold text-permdal-900">
                         Angebote für {produktName}
                         {produktSorte ? ` – ${produktSorte}` : ""}
                     </DialogTitle>
@@ -115,7 +115,7 @@ export default function AngeboteModal({
                                         {a.ernteProjektion && a.ernteProjektion.length > 0 && (
                                             <p className="text-xs text-muted-foreground">
                                                 Nächste Ernte:{" "}
-                                                {a.ernteProjektion.length === 1 
+                                                {a.ernteProjektion.length === 1
                                                     ? new Date(a.ernteProjektion[0]).toLocaleDateString("de-DE")
                                                     : `${new Date(a.ernteProjektion[0]).toLocaleDateString("de-DE")} - ${new Date(a.ernteProjektion[a.ernteProjektion.length - 1]).toLocaleDateString("de-DE")}`
                                                 }

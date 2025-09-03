@@ -124,7 +124,7 @@ export default function ProdukteKatalogPage() {
                         <TabsList
                             className="
           flex flex-wrap gap-1 rounded-xl
-          bg-emerald-50/60 border border-emerald-100 p-1
+          bg-permdal-50/60 border border-permdal-100 p-1
         "
                         >
                             {KATS.map((k) => (
@@ -133,10 +133,10 @@ export default function ProdukteKatalogPage() {
                                     value={k}
                                     className="
               rounded-lg px-3 py-1.5 text-sm
-              data-[state=active]:bg-emerald-200/60
-              data-[state=active]:text-emerald-900
+              data-[state=active]:bg-permdal-200/60
+              data-[state=active]:text-permdal-900
               data-[state=active]:shadow-sm
-              hover:bg-emerald-100/40 transition
+              hover:bg-permdal-100/40 transition
             "
                                 >
                                     {k}
@@ -175,17 +175,17 @@ export default function ProdukteKatalogPage() {
                                 <TabsList
                                     className="
               flex gap-1 rounded-lg
-              bg-emerald-50/60 border border-emerald-100 p-1
+              bg-permdal-50/60 border border-permdal-100 p-1
             "
                                 >
                                     <TabsTrigger
                                         value="cards"
                                         className="
                 rounded-md px-3 py-1.5 text-sm shrink-0
-                data-[state=active]:bg-emerald-200/60
-                data-[state=active]:text-emerald-900
+                data-[state=active]:bg-permdal-200/60
+                data-[state=active]:text-permdal-900
                 data-[state=active]:shadow-sm
-                hover:bg-emerald-100/40 transition
+                hover:bg-permdal-100/40 transition
               "
                                     >
                                         Karten
@@ -193,12 +193,12 @@ export default function ProdukteKatalogPage() {
                                     <TabsTrigger
                                         value="table"
                                         className="
-                rounded-md px-3 py-1.5 text-sm shrink-0
-                data-[state=active]:bg-emerald-200/60
-                data-[state=active]:text-emerald-900
-                data-[state=active]:shadow-sm
-                hover:bg-emerald-100/40 transition
-              "
+                                rounded-md px-3 py-1.5 text-sm shrink-0
+                                data-[state=active]:bg-permdal-200/60
+                                data-[state=active]:text-permdal-900
+                                data-[state=active]:shadow-sm
+                                hover:bg-permdal-100/40 transition
+                            "
                                     >
                                         Tabelle
                                     </TabsTrigger>
@@ -253,7 +253,7 @@ function CardsView({
                                             alt={p.name}
                                         />
                                     ) : (
-                                        <AvatarFallback className="bg-emerald-100 text-emerald-800">
+                                        <AvatarFallback className="bg-permdal-100 text-permdal-800">
                                             {'FB'}
                                         </AvatarFallback>
                                     )}
@@ -331,7 +331,7 @@ function TableView({
                                     <span
                                         className={[
                                             "text-xs px-2 py-1 rounded-full",
-                                            hasAngebote ? "bg-green-100 text-green-900" : "bg-gray-200 text-gray-600",
+                                            hasAngebote ? "bg-permdal-100 text-permdal-900" : "bg-permdal-200 text-permdal-600",
                                         ].join(" ")}
                                     >
                                         {hasAngebote ? `${count} Angebote` : "Keine"}

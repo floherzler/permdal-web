@@ -52,7 +52,7 @@ export default function ProtectedRoute({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-permdal-600 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Laden...</p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function ProtectedRoute({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-permdal-600 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Überprüfe Berechtigung...</p>
         </div>
       </div>

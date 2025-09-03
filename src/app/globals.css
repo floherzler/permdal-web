@@ -1,6 +1,36 @@
 /* globals.css */
 @import "tailwindcss";
 
+/* Brand colors as theme tokens */
+@theme {
+  --color-permdal-50: hsl(158 64% 96%);
+  --color-permdal-100: hsl(158 64% 88%);
+  --color-permdal-200: hsl(158 64% 76%);
+  --color-permdal-300: hsl(158 64% 64%);
+  --color-permdal-400: hsl(158 64% 52%);
+  --color-permdal-500: hsl(158 64% 40%);
+  --color-permdal-600: hsl(158 64% 32%);
+  --color-permdal-700: hsl(158 64% 24%);
+  --color-permdal-800: hsl(158 64% 16%);
+  --color-permdal-900: hsl(158 64% 8%);
+
+  /* Map semantic colors for shadcn/ui */
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(20 14.3% 4.1%);
+  --color-primary: var(--color-permdal-600);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: var(--color-permdal-50);
+  --color-secondary-foreground: var(--color-permdal-800);
+  --color-muted: var(--color-permdal-50);
+  --color-muted-foreground: hsl(25 5.3% 44.7%);
+  --color-accent: var(--color-permdal-100);
+  --color-accent-foreground: var(--color-permdal-800);
+  --color-border: var(--color-permdal-100);
+  --color-input: var(--color-permdal-100);
+  --color-ring: var(--color-permdal-600);
+}
+
+/* Base styles */
 @layer base {
   html {
     font-family: 'Inter', sans-serif;
@@ -8,23 +38,14 @@
   }
 
   body {
-    background-color: #F9FAFB;
-    /* tailwind gray-50 */
-    color: #111827;
-    /* tailwind gray-900 */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply bg-background text-foreground antialiased;
   }
 
   a {
-    color: #059669;
-    /* approximate primary color (emerald-500) */
-    transition-property: color;
-    transition-duration: 150ms;
+    @apply text-primary transition-colors;
   }
 
   a:hover {
-    color: #047857;
-    /* darker on hover (emerald-700) */
+    @apply text-permdal-700;
   }
 }

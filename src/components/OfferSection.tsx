@@ -29,7 +29,7 @@ export default function OfferSection() {
             <Link
                 href="/signup"
                 className="mt-6 flex items-center justify-center">
-                <button className="bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md border-2 border-green-700 hover:bg-green-600 transition-all flex items-center">
+                <button className="bg-permdal-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md border-2 border-permdal-600 hover:bg-permdal-700 transition-all flex items-center">
                     🤝 <span className="ml-2">jetzt Mitglied werden!</span>
                 </button>
             </Link>

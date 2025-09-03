@@ -187,7 +187,7 @@ export default function MarktplatzPage() {
     const getAvailabilityColor = (menge: number) => {
         if (menge === 0) return "bg-red-100 text-red-800";
         if (menge <= 10) return "bg-yellow-100 text-yellow-800";
-        return "bg-green-100 text-green-800";
+        return "bg-permdal-100 text-permdal-800";
     };
 
     const getAvailabilityText = (menge: number) => {
@@ -229,13 +229,13 @@ export default function MarktplatzPage() {
         <main className="min-h-screen container mx-auto px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
             {/* Header */}
             <div className="text-center space-y-2">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-emerald-900">Marktplatz</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-permdal-900">Marktplatz</h1>
                 <p className="text-sm sm:text-base lg:text-lg text-muted-foreground">
                     Aktuelle Angebote aus der Ostprignitz
                 </p>
                 <div className="flex justify-center mt-4">
                     <Link href="/produkte" passHref>
-                        <Button variant="outline" size="sm" className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 text-xs sm:text-sm">
+                        <Button variant="outline" size="sm" className="text-permdal-700 border-permdal-200 hover:bg-permdal-50 text-xs sm:text-sm">
                             Alle Produkte anzeigen
                         </Button>
                     </Link>
@@ -248,7 +248,7 @@ export default function MarktplatzPage() {
                     <TabsList
                         className="
           flex flex-wrap gap-1 rounded-xl
-          bg-emerald-50/60 border border-emerald-100 p-1
+          bg-permdal-50/60 border border-permdal-100 p-1
         "
                     >
                         {KATS.map((k) => (
@@ -257,10 +257,10 @@ export default function MarktplatzPage() {
                                 value={k}
                                 className={
                                     `rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm
-              data-[state=active]:bg-emerald-200/60
-              data-[state=active]:text-emerald-900
+              data-[state=active]:bg-permdal-200/60
+              data-[state=active]:text-permdal-900
               data-[state=active]:shadow-sm
-              hover:bg-emerald-100/40 transition`
+              hover:bg-permdal-100/40 transition`
                                 }
                             >
                                 {k}
@@ -364,7 +364,7 @@ export default function MarktplatzPage() {
                                                     alt={angebot.produkt.name}
                                                 />
                                             ) : (
-                                                <AvatarFallback className="bg-emerald-100 text-emerald-800 rounded-lg text-xs sm:text-sm">
+                                                <AvatarFallback className="bg-permdal-100 text-permdal-800 rounded-lg text-xs sm:text-sm">
                                                     {angebot.produkt.name.substring(0, 2).toUpperCase()}
                                                 </AvatarFallback>
                                             )}
@@ -398,7 +398,7 @@ export default function MarktplatzPage() {
                                             {angebot.mengeVerfuegbar} {angebot.einheit} verfügbar
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                                    <div className="flex items-center gap-2 text-sm font-semibold text-permdal-700">
                                         <Euro className="h-4 w-4" />
                                         <span>
                                             {formatPricePerUnit(angebot.euroPreis, angebot.menge, angebot.einheit)}
@@ -422,7 +422,7 @@ export default function MarktplatzPage() {
 
                                 <div className="pt-2">
                                     <Link href={`/angebote/${angebot.$id}`} passHref>
-                                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+                                        <Button className="w-full bg-permdal-600 hover:bg-permdal-700">
                                             Details anzeigen
                                         </Button>
                                     </Link>

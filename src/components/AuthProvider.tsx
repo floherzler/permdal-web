@@ -24,7 +24,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           setIsInitializing(false); // Fallback if hydration takes too long
         }
       }, 1000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [hydrated, verifySession]);
@@ -34,7 +34,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-permdal-600 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Laden...</p>
         </div>
       </div>

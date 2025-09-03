@@ -28,7 +28,7 @@ export default function CTA() {
         {/* CTA Button */}
         <a
           href="/signup"
-          className="bg-green-700 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-800 transition-all mt-6 w-3/4"
+          className="bg-permdal-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-permdal-700 transition-all mt-6 w-3/4"
         >
           Anmelden, um keine Neuigkeiten zu verpassen!
         </a>
