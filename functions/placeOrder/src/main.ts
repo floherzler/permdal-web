@@ -30,12 +30,55 @@ export default async ({ req, res, log, error }: any) => {
 
         // --- Inputs (body JSON or query string) ---
         let body: Body = {};
+        // 1) Try the standard fetch-style JSON helper if available
         try {
             body = await req.json();
             log(`[placeOrder] Parsed JSON body keys: ${Object.keys(body).join(',')}`)
         } catch {
             // ignore if not JSON
             log("[placeOrder] No JSON body provided (or parse failed)")
+        }
+        // 2) Appwrite Functions v7: prefer bodyJson/bodyText on the request
+        try {
+            if (!Object.keys(body).length && req.bodyJson && typeof req.bodyJson === 'object') {
+                body = req.bodyJson as Body;
+                log(`[placeOrder] Parsed req.bodyJson keys: ${Object.keys(body).join(',')}`)
+            } else if (!Object.keys(body).length && typeof req.bodyText === 'string' && req.bodyText.length > 0) {
+                log(`[placeOrder] Found bodyText (length ${req.bodyText.length})`)
+                try {
+                    const parsed = JSON.parse(req.bodyText);
+                    if (parsed && typeof parsed === 'object') {
+                        body = parsed as Body;
+                        log(`[placeOrder] Parsed bodyText JSON keys: ${Object.keys(body).join(',')}`)
+                    }
+                } catch (e) {
+                    log(`[placeOrder] bodyText is not valid JSON: ${String(e)}`)
+                }
+            }
+        } catch (e) {
+            log(`[placeOrder] Error reading bodyJson/bodyText: ${String(e)}`)
+        }
+        // 3) Legacy fallbacks sometimes seen (bodyRaw/payload)
+        try {
+            if (!Object.keys(body).length) {
+                const raw: unknown = (typeof (req as any).bodyRaw === 'string')
+                    ? (req as any).bodyRaw
+                    : (typeof (req as any).payload === 'string' ? (req as any).payload : undefined);
+                if (typeof raw === 'string' && raw.length > 0) {
+                    log(`[placeOrder] Found raw payload (length ${raw.length})`)
+                    try {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && typeof parsed === 'object') {
+                            body = parsed as Body;
+                            log(`[placeOrder] Parsed raw payload keys: ${Object.keys(body).join(',')}`)
+                        }
+                    } catch (e) {
+                        log(`[placeOrder] Raw payload is not valid JSON: ${String(e)}`)
+                    }
+                }
+            }
+        } catch (e) {
+            log(`[placeOrder] Error inspecting raw payload: ${String(e)}`)
         }
 
         const url = new URL(req.url);
@@ -49,11 +92,13 @@ export default async ({ req, res, log, error }: any) => {
         }
 
         // --- Appwrite clients (reuse your env pattern) ---
+        const endpoint = Deno.env.get("APPWRITE_FUNCTION_API_ENDPOINT") ?? (process.env.APPWRITE_FUNCTION_API_ENDPOINT as string | undefined) ?? "";
+        const projectId = Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID") ?? (process.env.APPWRITE_FUNCTION_PROJECT_ID as string | undefined) ?? "";
         const client = new Client()
-            .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
-            .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+            .setEndpoint(endpoint)
+            .setProject(projectId)
             .setKey(req.headers["x-appwrite-key"] ?? "");
-        log(`[placeOrder] Using endpoint=${process.env.APPWRITE_FUNCTION_API_ENDPOINT} project=${process.env.APPWRITE_FUNCTION_PROJECT_ID}`)
+        log(`[placeOrder] Using endpoint=${endpoint} project=${projectId}`)
 
         const db = new Databases(client);
         const users = new Users(client);
