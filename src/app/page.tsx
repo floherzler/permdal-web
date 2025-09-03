@@ -6,7 +6,6 @@ import AboutSection from "@/components/AboutSection";
 import OfferSection from "@/components/OfferSection";
 import ImageCarousel from "@/components/ImageCarousel";
 import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
 // export function CallToAction() {
 //   return (
 //     <div className="flex flex-col items-center justify-center w-full md:w-1/2 rounded-md p-8">
@@ -63,9 +62,7 @@ import Navbar from "@/components/Navbar";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar />
-      {/* Add margin-top to main for spacing after Navbar */}
-      <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 space-y-8 mt-12">
+      <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 space-y-4 sm:space-y-6 lg:space-y-8 px-4 sm:px-6 lg:px-8">
         <CTA />
         <AboutSection />
         <OfferSection />

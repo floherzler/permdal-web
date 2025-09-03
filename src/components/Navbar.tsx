@@ -1,3 +1,5 @@
+"use client";
+
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -6,34 +8,37 @@ import {
 } from "@/components/ui/navigation-menu";
 
 import Image from "next/image";
+import Link from "next/link";
 
 import { useAuthStore } from '@/store/Auth';
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();
   return (
-    <header className="bg-green-800">
-      <div className="container mx-auto p-4 flex justify-center">
-        <NavigationMenu className="flex items-center space-x-6">
-          <NavigationMenuList className="flex space-x-4">
-            {/* Startseite */}
+    <header className="bg-gradient-to-r from-emerald-800 to-emerald-700 shadow-lg sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3">
+        <NavigationMenu className="flex items-center justify-between">
+          <NavigationMenuList className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
+            {/* Startseite - Clickable Logo */}
             <NavigationMenuItem>
-              <div className="bg-white rounded-full p-2 flex items-center justify-center">
-                <Image
-                  src="/img/agroforst_ff_blume.png"
-                  height={80}
-                  width={80}
-                  className="h-[80px] w-[80px] object-cover"
-                  alt="Permdal Logo"
-                />
-              </div>
+              <Link href="/" className="block">
+                <div className="bg-white rounded-full p-1 sm:p-2 flex items-center justify-center hover:shadow-lg transition-all duration-200 hover:scale-105">
+                  <Image
+                    src="/img/agroforst_ff_blume.png"
+                    height={80}
+                    width={80}
+                    className="h-12 w-12 sm:h-16 sm:w-16 lg:h-[80px] lg:w-[80px] object-cover"
+                    alt="Permdal Logo"
+                  />
+                </div>
+              </Link>
             </NavigationMenuItem>
 
             {/* Marktplatz */}
             <NavigationMenuItem>
               <NavigationMenuLink
                 href="/marktplatz"
-                className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
+                className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white bg-emerald-600/20 rounded-lg hover:bg-emerald-600/40 transition-all duration-200 border border-emerald-500/30"
               >
                 Marktplatz
               </NavigationMenuLink>
@@ -43,7 +48,7 @@ export default function Navbar() {
             <NavigationMenuItem>
               <NavigationMenuLink
                 href="/blog"
-                className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
+                className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white bg-emerald-600/20 rounded-lg hover:bg-emerald-600/40 transition-all duration-200 border border-emerald-500/30"
               >
                 Blog
               </NavigationMenuLink>
@@ -73,18 +78,19 @@ export default function Navbar() {
             {/* Anmelden */}
             {user ? (
               <NavigationMenuItem>
-                <button
-                  onClick={logout}
-                  className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
+                <NavigationMenuLink
+                  href="/konto"
+                  className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white bg-emerald-600/20 rounded-lg hover:bg-emerald-600/40 transition-all duration-200 border border-emerald-500/30 truncate max-w-[120px] sm:max-w-none"
+                  title={user.name}
                 >
-                  {user.name} abmelden
-                </button>
+                  {user.name}
+                </NavigationMenuLink>
               </NavigationMenuItem>
             ) : (
               <NavigationMenuItem>
                 <NavigationMenuLink
                   href="/login"
-                  className="px-4 py-2 text-sm font-medium text-gray-800 bg-emerald-50 rounded-lg hover:bg-gray-300 transition-all"
+                  className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white bg-emerald-600/20 rounded-lg hover:bg-emerald-600/40 transition-all duration-200 border border-emerald-500/30"
                 >
                   Anmelden
                 </NavigationMenuLink>

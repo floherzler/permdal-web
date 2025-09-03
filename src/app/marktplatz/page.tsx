@@ -108,7 +108,7 @@ export default function MarktplatzPage() {
                     .map((doc: any) => {
                         const produkt = produkteMap.get(doc.produktID);
                         if (!produkt) return null; // Skip if no matching produkt found
-                        
+
                         return {
                             $id: doc.$id,
                             $createdAt: doc.$createdAt,
@@ -199,43 +199,43 @@ export default function MarktplatzPage() {
     const formatPricePerUnit = (euroPreis: number, menge: number, einheit: string) => {
         let displayMenge = menge;
         let displayEinheit = einheit;
-        
+
         // Convert grams to kg if >= 1000
         if (einheit.toLowerCase() === "gramm" && menge >= 1000) {
             return `${euroPreis.toFixed(2)} / kg`;
         }
-        
+
         // For single units, omit the number
         if (menge === 1 && einheit.toLowerCase() === "stück") {
             return `${euroPreis.toFixed(2)} / Stück`;
         }
-        
+
         return `${euroPreis.toFixed(2)} € / ${displayMenge} ${displayEinheit}`;
     };
 
     const formatHarvestRange = (ernteProjektion: string[] | undefined) => {
         if (!ernteProjektion || ernteProjektion.length === 0) return null;
-        
+
         if (ernteProjektion.length === 1) {
             return new Date(ernteProjektion[0]).toLocaleDateString("de-DE");
         }
-        
+
         const startDate = new Date(ernteProjektion[0]).toLocaleDateString("de-DE");
         const endDate = new Date(ernteProjektion[ernteProjektion.length - 1]).toLocaleDateString("de-DE");
         return `${startDate} - ${endDate}`;
     };
 
     return (
-        <main className="min-h-screen container mx-auto p-4 space-y-6">
+        <main className="min-h-screen container mx-auto px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
             {/* Header */}
             <div className="text-center space-y-2">
-                <h1 className="text-4xl font-bold text-emerald-900">Marktplatz</h1>
-                <p className="text-lg text-muted-foreground">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-emerald-900">Marktplatz</h1>
+                <p className="text-sm sm:text-base lg:text-lg text-muted-foreground">
                     Aktuelle Angebote aus der Ostprignitz
                 </p>
                 <div className="flex justify-center mt-4">
                     <Link href="/produkte" passHref>
-                        <Button variant="outline" size="sm" className="text-emerald-700 border-emerald-200 hover:bg-emerald-50">
+                        <Button variant="outline" size="sm" className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 text-xs sm:text-sm">
                             Alle Produkte anzeigen
                         </Button>
                     </Link>
@@ -255,13 +255,13 @@ export default function MarktplatzPage() {
                             <TabsTrigger
                                 key={k}
                                 value={k}
-                                className="
-              rounded-lg px-3 py-1.5 text-sm
+                                className={
+                                    `rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm
               data-[state=active]:bg-emerald-200/60
               data-[state=active]:text-emerald-900
               data-[state=active]:shadow-sm
-              hover:bg-emerald-100/40 transition
-            "
+              hover:bg-emerald-100/40 transition`
+                                }
                             >
                                 {k}
                             </TabsTrigger>
@@ -271,9 +271,9 @@ export default function MarktplatzPage() {
             </div>
 
             {/* Controls */}
-            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+            <div className="flex flex-col gap-4">
                 {/* Search */}
-                <div className="relative flex-1 max-w-md">
+                <div className="relative w-full">
                     <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         className="pl-10"
@@ -286,7 +286,7 @@ export default function MarktplatzPage() {
                 {/* Filters and Sort */}
                 <div className="flex flex-wrap gap-2">
                     <Select value={filterBy} onValueChange={(value: FilterOption) => setFilterBy(value)}>
-                        <SelectTrigger className="w-[140px]">
+                        <SelectTrigger className="w-full sm:w-[140px] text-xs sm:text-sm">
                             <Filter className="h-4 w-4 mr-2" />
                             <SelectValue />
                         </SelectTrigger>
@@ -298,7 +298,7 @@ export default function MarktplatzPage() {
                     </Select>
 
                     <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                        <SelectTrigger className="w-[140px]">
+                        <SelectTrigger className="w-full sm:w-[140px] text-xs sm:text-sm">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
@@ -314,7 +314,7 @@ export default function MarktplatzPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                            className="w-[40px]"
+                            className="w-[40px] text-xs sm:text-sm"
                         >
                             {sortOrder === "asc" ? "↑" : "↓"}
                         </Button>
@@ -323,7 +323,7 @@ export default function MarktplatzPage() {
             </div>
 
             {/* Results count */}
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground">
                 {loading
                     ? "Laden..."
                     : filteredAndSortedAngebote.length === 1
@@ -334,7 +334,7 @@ export default function MarktplatzPage() {
 
             {/* Angebote Grid */}
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {Array.from({ length: 6 }).map((_, i) => (
                         <Card key={i} className="animate-pulse">
                             <CardHeader>
@@ -351,40 +351,40 @@ export default function MarktplatzPage() {
                     ))}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {filteredAndSortedAngebote.map((angebot) => (
                         <Card key={angebot.$id} className="hover:shadow-md transition-shadow">
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="h-12 w-12 rounded-lg">
+                                    <div className="flex items-center gap-2 sm:gap-3">
+                                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg">
                                             {angebot.produkt.imageID ? (
                                                 <AvatarImage
                                                     src={storage.getFilePreview(STORAGE_BUCKET, angebot.produkt.imageID, 160, 160)}
                                                     alt={angebot.produkt.name}
                                                 />
                                             ) : (
-                                                <AvatarFallback className="bg-emerald-100 text-emerald-800 rounded-lg">
+                                                <AvatarFallback className="bg-emerald-100 text-emerald-800 rounded-lg text-xs sm:text-sm">
                                                     {angebot.produkt.name.substring(0, 2).toUpperCase()}
                                                 </AvatarFallback>
                                             )}
                                         </Avatar>
-                                        <div>
-                                            <CardTitle className="text-lg">
+                                        <div className="min-w-0 flex-1">
+                                            <CardTitle className="text-sm sm:text-lg truncate">
                                                 {angebot.produkt.name}
                                                 {angebot.produkt.sorte && (
-                                                    <span className="text-sm font-normal text-muted-foreground">
+                                                    <span className="text-xs sm:text-sm font-normal text-muted-foreground">
                                                         {" "}
                                                         – {angebot.produkt.sorte}
                                                     </span>
                                                 )}
                                             </CardTitle>
-                                            <CardDescription>
+                                            <CardDescription className="text-xs sm:text-sm truncate">
                                                 {angebot.produkt.unterkategorie}
                                             </CardDescription>
                                         </div>
                                     </div>
-                                    <Badge className={getAvailabilityColor(angebot.mengeVerfuegbar)}>
+                                    <Badge className={`${getAvailabilityColor(angebot.mengeVerfuegbar)} text-xs`}>
                                         {getAvailabilityText(angebot.mengeVerfuegbar)}
                                     </Badge>
                                 </div>
