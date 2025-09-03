@@ -115,8 +115,8 @@ export default async ({ req, res, log, error }: any) => {
         // --- Load & validate membership ---
         log(`[placeOrder] Fetch membership ${mitgliedschaftID}`)
         const mitgliedschaft: any = await db.getDocument(DB_ID, COLL_MITGLIEDSCHAFT, mitgliedschaftID);
-        log(`[placeOrder] Membership fetched. user_id=${mitgliedschaft?.user_id} status=${mitgliedschaft?.status}`)
-        if (mitgliedschaft.user_id !== callerId) {
+        log(`[placeOrder] Membership fetched. user_id=${mitgliedschaft?.userID} status=${mitgliedschaft?.status}`)
+        if (mitgliedschaft.userID !== callerId) {
             return fail(res, "Membership does not belong to caller", 403);
         }
         if (mitgliedschaft.status !== "aktiv") {
@@ -180,9 +180,9 @@ export default async ({ req, res, log, error }: any) => {
 
         log(`[placeOrder] Create order document id=${orderId}`)
         const bestellung = await db.createDocument(DB_ID, COLL_BESTELLUNG, orderId, {
-            user_id: callerId,
-            mitgliedschaft_id: mitgliedschaftID,
-            angebot_id: angebotID,
+            userID: callerId,
+            mitgliedschaftID: mitgliedschaftID,
+            angebotID: angebotID,
             menge,
             einheit,               // snapshot
             preis_einheit,         // snapshot
@@ -190,7 +190,6 @@ export default async ({ req, res, log, error }: any) => {
             produkt_name,          // snapshot
             abholung: angebot.abholung ?? null,
             status: "offen",
-            erstellt_am: nowIso,
             user_mail: "",         // optional: fill below if we can read user
         });
         log(`[placeOrder] Order document created -> ${bestellung?.$id}`)
