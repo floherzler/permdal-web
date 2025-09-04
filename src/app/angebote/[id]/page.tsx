@@ -6,7 +6,11 @@ import { notFound } from "next/navigation";
 import AngebotLive from "@/components/AngebotLive";
 import OrderDialog from "@/components/OrderDialog";
 
-export default async function AngebotPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AngebotPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
     const { id } = await params;
     const angebot = await databases.getDocument(
         env.appwrite.db,
@@ -14,7 +18,6 @@ export default async function AngebotPage({ params }: { params: Promise<{ id: st
         id
     );
 
-    // Kontakt via Formular (Popup)
 
     return (
         <main className="container mx-auto p-6 max-w-2xl">
@@ -49,8 +52,6 @@ export default async function AngebotPage({ params }: { params: Promise<{ id: st
             <div className="mt-6">
                 <OrderDialog angebotId={id} />
             </div>
-
-
         </main>
     );
 }

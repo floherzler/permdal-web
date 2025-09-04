@@ -5,6 +5,8 @@ import {
     Databases,
     Users,
     ID,
+    Permission,
+    Role
 } from "https://deno.land/x/appwrite@7.0.0/mod.ts";
 
 type Body = {
@@ -187,11 +189,14 @@ export default async ({ req, res, log, error }: any) => {
             einheit,               // snapshot
             preis_einheit,         // snapshot
             preis_gesamt,          // computed
-            produkt_name,          // snapshot
+            produkt_name,         // snapshot
             abholung: angebot.abholung ?? null,
-            status: "offen",
+            status: "angefragt",
             user_mail: "",         // optional: fill below if we can read user
-        });
+        },
+            // grant read permission to the caller so they can view their order
+            [Permission.read(Role.user(callerId))]
+        );
         log(`[placeOrder] Order document created -> ${bestellung?.$id}`)
 
         // --- Load user email (best effort) ---
