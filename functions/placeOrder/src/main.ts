@@ -254,7 +254,17 @@ export default async ({ req, res, log, error }: any) => {
             preis_gesamt,
         }, 201);
     } catch (e: any) {
-        error("[placeOrder] Uncaught error (no private details logged) 🚨");
+        // Log the error details to the function logs for debugging. We still return a generic
+        // message to the caller to avoid leaking internal state to the client.
+        try {
+            const msg = String(e?.message ?? e ?? 'Unknown error');
+            const stack = String(e?.stack ?? '');
+            error(`[placeOrder] Uncaught error: ${msg} 🚨`);
+            if (stack) error(`[placeOrder] Stack trace: ${stack.split('\n').slice(0, 5).join(' | ')} ...`);
+        } catch (_logErr) {
+            // If logging itself fails, fall back to a minimal message
+            error('[placeOrder] Uncaught error (failed to stringify) 🚨');
+        }
         return fail(res, "Internal error", 500);
     }
 };
