@@ -172,7 +172,10 @@ export default async ({ req, res, log, error }: any) => {
         // --- Snapshot pricing & unit ---
         const einheit = String(angebot.einheit);
         const preis_einheit = Number(angebot.euroPreis ?? 0);
-        const preis_gesamt = Number((menge * preis_einheit).toFixed(2));
+        // If the unit is "Gramm", convert menge to kilograms for pricing
+        const preis_gesamt = einheit === "Gramm" && angebot.menge === 1000
+            ? Number(((menge / 1000) * preis_einheit).toFixed(2))
+            : Number((menge * preis_einheit).toFixed(2));
         log(`[placeOrder] Pricing snapshot -> einheit=${einheit} pE=${preis_einheit} menge=${menge} total=${preis_gesamt} 🧾`)
 
         // --- Update Angebot availability (simple check-then-update) ---
