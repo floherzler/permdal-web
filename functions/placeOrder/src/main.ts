@@ -137,8 +137,14 @@ export default async ({ req, res, log, error }: any) => {
 
         // --- Load Angebot ---
         log(`[placeOrder] Fetching angebot (id not logged) 🔎`)
-        const angebot: any = await db.getDocument(DB_ID, COLL_ANGEBOTE, angebotID);
-        log(`[placeOrder] Angebot fetched. verfuegbar=${angebot?.mengeVerfuegbar} einheit=${angebot?.einheit} preis=${angebot?.euroPreis} 📦`)
+        let angebot: any = null;
+        try {
+            angebot = await db.getDocument(DB_ID, COLL_ANGEBOTE, angebotID);
+            log(`[placeOrder] Angebot fetched. verfuegbar=${angebot?.mengeVerfuegbar} einheit=${angebot?.einheit} preis=${angebot?.euroPreis} 📦`)
+        } catch (e: any) {
+            error(`[placeOrder] Failed fetching angebot (masked): ${String(e?.message ?? e)} ⚠️`);
+            return fail(res, "Failed to fetch angebot", 500);
+        }
 
         const verf = Number(angebot.mengeVerfuegbar ?? 0);
         if (!Number.isFinite(verf) || verf < menge) {
@@ -176,34 +182,45 @@ export default async ({ req, res, log, error }: any) => {
         const nextAbgeholt = Number(angebot.mengeAbgeholt ?? 0) + menge;
         log(`[placeOrder] Update angebote availability -> vorher=${verf} nachher=${nextVerf} abgeholt=${nextAbgeholt} 🔄`)
 
-        await db.updateDocument(DB_ID, COLL_ANGEBOTE, angebotID, {
-            mengeVerfuegbar: nextVerf,
-            mengeAbgeholt: nextAbgeholt,
-        });
-        log(`[placeOrder] Angebot availability updated`)
+        try {
+            await db.updateDocument(DB_ID, COLL_ANGEBOTE, angebotID, {
+                mengeVerfuegbar: nextVerf,
+                mengeAbgeholt: nextAbgeholt,
+            });
+            log(`[placeOrder] Angebot availability updated`)
+        } catch (e: any) {
+            error(`[placeOrder] Failed updating angebot availability (masked): ${String(e?.message ?? e)} ⚠️`);
+            return fail(res, "Failed to update angebot availability", 500);
+        }
 
         // --- Create Bestellung (snapshot) ---
         const orderId = ID.unique();
         const nowIso = new Date().toISOString();
 
         log(`[placeOrder] Creating order document (new) 📝`)
-        const bestellung = await db.createDocument(DB_ID, COLL_BESTELLUNG, orderId, {
-            userID: callerId,
-            mitgliedschaftID: mitgliedschaftID || null,
-            angebotID: angebotID,
-            menge,
-            einheit,               // snapshot
-            preis_einheit,         // snapshot
-            preis_gesamt,          // computed
-            produkt_name,         // snapshot
-            abholung: angebot.abholung ?? null,
-            status: "angefragt",
-            user_mail: "",         // optional: fill below if we can read user
-        },
-            // grant read permission to the caller so they can view their order
-            [Permission.read(Role.user(callerId))]
-        );
-        log(`[placeOrder] Order document created ✅`)
+        let bestellung: any = null;
+        try {
+            bestellung = await db.createDocument(DB_ID, COLL_BESTELLUNG, orderId, {
+                userID: callerId,
+                mitgliedschaftID: mitgliedschaftID || null,
+                angebotID: angebotID,
+                menge,
+                einheit,               // snapshot
+                preis_einheit,         // snapshot
+                preis_gesamt,          // computed
+                produkt_name,         // snapshot
+                abholung: angebot.abholung ?? null,
+                status: "angefragt",
+                user_mail: "",         // optional: fill below if we can read user
+            },
+                // grant read permission to the caller so they can view their order
+                [Permission.read(Role.user(callerId))]
+            );
+            log(`[placeOrder] Order document created ✅`)
+        } catch (e: any) {
+            error(`[placeOrder] Failed creating order document (masked): ${String(e?.message ?? e)} ⚠️`);
+            return fail(res, "Failed to create order", 500);
+        }
 
         // --- Load user email (best effort) ---
         let userEmail = "";
@@ -261,6 +278,13 @@ export default async ({ req, res, log, error }: any) => {
             const stack = String(e?.stack ?? '');
             error(`[placeOrder] Uncaught error: ${msg} 🚨`);
             if (stack) error(`[placeOrder] Stack trace: ${stack.split('\n').slice(0, 5).join(' | ')} ...`);
+
+            // If debug mode is enabled via env, include error details in the response (useful for debugging).
+            const debugFlag = Deno.env.get('APPWRITE_FUNCTION_DEBUG') ?? Deno.env.get('APP_DEBUG') ?? process.env.APPWRITE_FUNCTION_DEBUG ?? process.env.APP_DEBUG;
+            const debugOn = String(debugFlag ?? '').trim() === '1';
+            if (debugOn) {
+                return fail(res, "Internal error", 500, { details: msg, stack: stack.split('\n').slice(0, 5) });
+            }
         } catch (_logErr) {
             // If logging itself fails, fall back to a minimal message
             error('[placeOrder] Uncaught error (failed to stringify) 🚨');
