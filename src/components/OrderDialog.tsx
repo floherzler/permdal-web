@@ -96,7 +96,6 @@ export default function OrderDialog({ angebotId }: Props) {
     try {
       const payload = {
         angebotID: angebotId,
-        mitgliedschaftID: "devMembership",
         menge: internalMenge,
         user_mail: user_mail, // Pass user_mail to the function
       }

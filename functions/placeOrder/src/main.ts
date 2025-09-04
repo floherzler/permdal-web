@@ -27,7 +27,7 @@ export default async ({ req, res, log, error }: any) => {
         // --- Caller auth (provided by Appwrite gateway) ---
         const callerId: string | undefined =
             req.headers["x-appwrite-user-id"] ?? req.headers["X-Appwrite-User-Id"];
-        log(`[placeOrder] Incoming request. Has callerId: ${Boolean(callerId)}`)
+        log(`[placeOrder] Incoming request. Caller present: ${Boolean(callerId)} 🔒`)
         if (!callerId) return fail(res, "Unauthenticated: missing x-appwrite-user-id header", 401);
 
         // --- Inputs (body JSON or query string) ---
@@ -35,18 +35,18 @@ export default async ({ req, res, log, error }: any) => {
         // 1) Try the standard fetch-style JSON helper if available
         try {
             body = await req.json();
-            log(`[placeOrder] Parsed JSON body keys: ${Object.keys(body).join(',')}`)
+            log(`[placeOrder] Parsed JSON body keys: ${Object.keys(body).join(',')} 🧾`)
         } catch {
             // ignore if not JSON
-            log("[placeOrder] No JSON body provided (or parse failed)")
+            log("[placeOrder] No JSON body provided (or parse failed) 🧾")
         }
         // 2) Appwrite Functions v7: prefer bodyJson/bodyText on the request
         try {
             if (!Object.keys(body).length && req.bodyJson && typeof req.bodyJson === 'object') {
                 body = req.bodyJson as Body;
-                log(`[placeOrder] Parsed req.bodyJson keys: ${Object.keys(body).join(',')}`)
+                log(`[placeOrder] Parsed req.bodyJson keys: ${Object.keys(body).join(',')} 🧾`)
             } else if (!Object.keys(body).length && typeof req.bodyText === 'string' && req.bodyText.length > 0) {
-                log(`[placeOrder] Found bodyText (length ${req.bodyText.length})`)
+                log(`[placeOrder] Found bodyText (length ${req.bodyText?.length ?? 0}) 🧾`)
                 try {
                     const parsed = JSON.parse(req.bodyText);
                     if (parsed && typeof parsed === 'object') {
@@ -54,11 +54,11 @@ export default async ({ req, res, log, error }: any) => {
                         log(`[placeOrder] Parsed bodyText JSON keys: ${Object.keys(body).join(',')}`)
                     }
                 } catch (e) {
-                    log(`[placeOrder] bodyText is not valid JSON: ${String(e)}`)
+                    log(`[placeOrder] bodyText is not valid JSON (parse error) ⚠️`)
                 }
             }
         } catch (e) {
-            log(`[placeOrder] Error reading bodyJson/bodyText: ${String(e)}`)
+            log(`[placeOrder] Error reading request body (non-fatal) ⚠️`)
         }
         // 3) Legacy fallbacks sometimes seen (bodyRaw/payload)
         try {
@@ -67,30 +67,31 @@ export default async ({ req, res, log, error }: any) => {
                     ? (req as any).bodyRaw
                     : (typeof (req as any).payload === 'string' ? (req as any).payload : undefined);
                 if (typeof raw === 'string' && raw.length > 0) {
-                    log(`[placeOrder] Found raw payload (length ${raw.length})`)
+                    log(`[placeOrder] Found raw payload (length ${String((raw as string)?.length ?? 0)}) 🧾`)
                     try {
                         const parsed = JSON.parse(raw);
                         if (parsed && typeof parsed === 'object') {
                             body = parsed as Body;
-                            log(`[placeOrder] Parsed raw payload keys: ${Object.keys(body).join(',')}`)
+                            log(`[placeOrder] Parsed raw payload keys: ${Object.keys(body).join(',')} 🧾`)
                         }
                     } catch (e) {
-                        log(`[placeOrder] Raw payload is not valid JSON: ${String(e)}`)
+                        log(`[placeOrder] Raw payload is not valid JSON (parse error) ⚠️`)
                     }
                 }
             }
         } catch (e) {
-            log(`[placeOrder] Error inspecting raw payload: ${String(e)}`)
+            log(`[placeOrder] Error inspecting raw payload (non-fatal) ⚠️`)
         }
 
         const url = new URL(req.url);
         const angebotID = (body.angebotID ?? url.searchParams.get("angebotID") ?? "").trim();
-        const mitgliedschaftID = (body.mitgliedschaftID ?? url.searchParams.get("mitgliedschaftID") ?? "").trim();
+        const mitgliedschaftID = ((body.mitgliedschaftID ?? url.searchParams.get("mitgliedschaftID") ?? "") as string).trim();
         const menge = Number(body.menge ?? url.searchParams.get("menge"));
-        log(`[placeOrder] Inputs -> angebotID=${angebotID || '(empty)'} mitgliedschaftID=${mitgliedschaftID || '(empty)'} menge=${menge}`)
+        log(`[placeOrder] Inputs -> angebotIDProvided=${!!angebotID} mitgliedschaftProvided=${!!mitgliedschaftID} menge=${menge} 🔎`)
 
-        if (!angebotID || !mitgliedschaftID || !Number.isFinite(menge) || menge <= 0) {
-            return fail(res, "Invalid input: require { angebotID, mitgliedschaftID, menge > 0 }");
+        // mitgliedschaftID is optional now; require only angebotID and menge > 0
+        if (!angebotID || !Number.isFinite(menge) || menge <= 0) {
+            return fail(res, "Invalid input: require { angebotID, menge > 0 }");
         }
 
         // --- Appwrite clients (reuse your env pattern) ---
@@ -100,7 +101,7 @@ export default async ({ req, res, log, error }: any) => {
             .setEndpoint(endpoint)
             .setProject(projectId)
             .setKey(req.headers["x-appwrite-key"] ?? "");
-        log(`[placeOrder] Using endpoint=${endpoint} project=${projectId}`)
+        log(`[placeOrder] Appwrite client configured ✅`)
 
         const db = new Databases(client);
         const users = new Users(client);
@@ -112,17 +113,22 @@ export default async ({ req, res, log, error }: any) => {
         const COLL_PRODUKTE = Deno.env.get("COLL_PRODUKTE") ?? "";
         const COLL_NOTIFICATIONS = Deno.env.get("COLL_NOTIFICATIONS") ?? "";
         const ADMIN_EMAIL = Deno.env.get("ADMIN_EMAIL") ?? "";
-        log(`[placeOrder] Env -> DB=${DB_ID} ANG=${COLL_ANGEBOTE} ORD=${COLL_BESTELLUNG} MITGL=${COLL_MITGLIEDSCHAFT} PROD=${Boolean(COLL_PRODUKTE)} NOTIF=${Boolean(COLL_NOTIFICATIONS)}`)
+        log(`[placeOrder] Environment loaded: DB configured=${!!DB_ID}, collections present: angebote=${!!COLL_ANGEBOTE}, bestellung=${!!COLL_BESTELLUNG}, mitgliedschaft=${!!COLL_MITGLIEDSCHAFT} 📦`)
 
-        // --- Load & validate membership ---
-        log(`[placeOrder] Fetch membership ${mitgliedschaftID}`)
-        const mitgliedschaft: any = await db.getDocument(DB_ID, COLL_MITGLIEDSCHAFT, mitgliedschaftID);
-        log(`[placeOrder] Membership fetched. user_id=${mitgliedschaft?.userID} status=${mitgliedschaft?.status}`)
-        if (mitgliedschaft.userID !== callerId) {
-            return fail(res, "Membership does not belong to caller", 403);
-        }
-        if (mitgliedschaft.status !== "aktiv") {
-            return fail(res, "Membership is not active", 409, { status: mitgliedschaft.status });
+        // --- Load & validate membership (optional) ---
+        let mitgliedschaft: any = null;
+        if (mitgliedschaftID) {
+            log(`[placeOrder] Fetching membership (if provided) 🔎`)
+            mitgliedschaft = await db.getDocument(DB_ID, COLL_MITGLIEDSCHAFT, mitgliedschaftID);
+            log(`[placeOrder] Membership fetched. status=${mitgliedschaft?.status} ✅`)
+            if (mitgliedschaft.userID !== callerId) {
+                return fail(res, "Membership does not belong to caller", 403);
+            }
+            if (mitgliedschaft.status !== "aktiv") {
+                return fail(res, "Membership is not active", 409, { status: mitgliedschaft.status });
+            }
+        } else {
+            log(`[placeOrder] No mitgliedschaftID provided; proceeding without membership checks ⚠️`)
         }
 
         // (Optional) enforce membership quota here:
@@ -130,9 +136,9 @@ export default async ({ req, res, log, error }: any) => {
         // const preisCheck = ... compare against order total later if you want hard quota
 
         // --- Load Angebot ---
-        log(`[placeOrder] Fetch angebot ${angebotID}`)
+        log(`[placeOrder] Fetching angebot (id not logged) 🔎`)
         const angebot: any = await db.getDocument(DB_ID, COLL_ANGEBOTE, angebotID);
-        log(`[placeOrder] Angebot fetched. verfuegbar=${angebot?.mengeVerfuegbar} einheit=${angebot?.einheit} preis=${angebot?.euroPreis}`)
+        log(`[placeOrder] Angebot fetched. verfuegbar=${angebot?.mengeVerfuegbar} einheit=${angebot?.einheit} preis=${angebot?.euroPreis} 📦`)
 
         const verf = Number(angebot.mengeVerfuegbar ?? 0);
         if (!Number.isFinite(verf) || verf < menge) {
@@ -161,14 +167,14 @@ export default async ({ req, res, log, error }: any) => {
         const einheit = String(angebot.einheit);
         const preis_einheit = Number(angebot.euroPreis ?? 0);
         const preis_gesamt = Number((menge * preis_einheit).toFixed(2));
-        log(`[placeOrder] Pricing snapshot -> einheit=${einheit} pE=${preis_einheit} menge=${menge} total=${preis_gesamt}`)
+        log(`[placeOrder] Pricing snapshot -> einheit=${einheit} pE=${preis_einheit} menge=${menge} total=${preis_gesamt} 🧾`)
 
         // --- Update Angebot availability (simple check-then-update) ---
         // Note: SDK v7 doesn’t support optimistic "ifRevision" guard; in high traffic,
         // you can wrap this block in a small retry loop.
         const nextVerf = verf - menge;
         const nextAbgeholt = Number(angebot.mengeAbgeholt ?? 0) + menge;
-        log(`[placeOrder] Update angebot availability -> vorher=${verf} nachher=${nextVerf} abgeholt=${nextAbgeholt}`)
+        log(`[placeOrder] Update angebote availability -> vorher=${verf} nachher=${nextVerf} abgeholt=${nextAbgeholt} 🔄`)
 
         await db.updateDocument(DB_ID, COLL_ANGEBOTE, angebotID, {
             mengeVerfuegbar: nextVerf,
@@ -180,10 +186,10 @@ export default async ({ req, res, log, error }: any) => {
         const orderId = ID.unique();
         const nowIso = new Date().toISOString();
 
-        log(`[placeOrder] Create order document id=${orderId}`)
+        log(`[placeOrder] Creating order document (new) 📝`)
         const bestellung = await db.createDocument(DB_ID, COLL_BESTELLUNG, orderId, {
             userID: callerId,
-            mitgliedschaftID: mitgliedschaftID,
+            mitgliedschaftID: mitgliedschaftID || null,
             angebotID: angebotID,
             menge,
             einheit,               // snapshot
@@ -197,22 +203,22 @@ export default async ({ req, res, log, error }: any) => {
             // grant read permission to the caller so they can view their order
             [Permission.read(Role.user(callerId))]
         );
-        log(`[placeOrder] Order document created -> ${bestellung?.$id}`)
+        log(`[placeOrder] Order document created ✅`)
 
         // --- Load user email (best effort) ---
         let userEmail = "";
         try {
-            log(`[placeOrder] Fetch user ${callerId}`)
+            log(`[placeOrder] Fetching user profile (caller) 🔎`)
             const user = await users.get(callerId);
             // @ts-ignore older SDK type
             userEmail = (user as any).email ?? "";
             if (userEmail) {
                 await db.updateDocument(DB_ID, COLL_BESTELLUNG, bestellung.$id, { user_mail: userEmail });
-                log(`[placeOrder] Wrote user email to order`)
+                log(`[placeOrder] Wrote user email to order (masked) 🔒`)
             }
         } catch (_e) {
             // not fatal
-            log("[placeOrder] Could not fetch user or write email (non-fatal)")
+            log("[placeOrder] Could not fetch user or write email (non-fatal) ⚠️")
         }
 
         // --- Notification (for admin panel) ---
@@ -237,7 +243,7 @@ export default async ({ req, res, log, error }: any) => {
                     delivered: false, // your admin UI can flip this after sending an email manually/automatically
                 });
             } catch (e) {
-                log("[placeOrder] Notification write failed: " + String(e));
+                log("[placeOrder] Notification write failed (non-fatal) ⚠️");
             }
         }
 
@@ -248,7 +254,7 @@ export default async ({ req, res, log, error }: any) => {
             preis_gesamt,
         }, 201);
     } catch (e: any) {
-        error("[placeOrder] Uncaught error: " + (e?.message ?? String(e)));
-        return fail(res, "Internal error", 500, { details: String(e) });
+        error("[placeOrder] Uncaught error (no private details logged) 🚨");
+        return fail(res, "Internal error", 500);
     }
 };
